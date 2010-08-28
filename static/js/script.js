@@ -22,23 +22,3 @@ $(document).ready(function() {
  });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
