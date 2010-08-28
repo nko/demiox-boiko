@@ -1,4 +1,4 @@
-$(function(){
+$(function(){ 
     //Globals
     var W=10; //Width of tiles
     var walls = "#"; //Can't walk on these
@@ -50,6 +50,7 @@ $(function(){
         widthPX : 25 * W,
         heightPX : 25 * W,
         refreshRate : 45,
+        distanceFrom00 : 5, //TODO make general
     };
     var gameState = {
         keys : new Array(255),
@@ -64,10 +65,18 @@ $(function(){
          * Utility functions
          */
     var utils = {
+
         isWall : 
             function(x){
                 return walls.indexOf(x) != -1;
             },
+
+        //Returns true if the point at pX, pY intersects the rect with top left rX1, rY1 and bottom right rX2, rY2
+        pointIntersectRect : 
+            function (point, rect){
+                return  (point.x >= rect.x1 && point.x <= rect.x2 &&
+                         point.y >= rect.y1 && point.y <= rect.y2 );
+            }
     };
 
     /*
@@ -97,6 +106,18 @@ $(function(){
      * Dynamic objects
      */
 
+    function Rect(x1, y1, x2, y2){
+        this.x1=x1;
+        this.y1=y1;
+        this.x2=x2;
+        this.y2=y2;
+    }
+
+    function Point(x, y){
+        this.x=x;
+        this.y=y;
+    }
+
     /*
      * Bullet
      *
@@ -108,8 +129,10 @@ $(function(){
      * dx/dy should be normalized (squared they should add to 1).
      */
     function Bullet(x, y, color, speed, dx, dy){
+        this.DMG = 1;
         this.x = x;
         this.y = y;
+        this.point = new Point(x, y);
         this.W = 4;
         this.id = getUniqueID();
         this.color = color;
@@ -137,8 +160,25 @@ $(function(){
             var destroy = false;
             this.x += this.dx;
             this.y += this.dy;
+            this.point = new Point(this.x, this.y);
+
             if (this.checkCollisions()){
                 this.destroy();
+                return;
+            }
+            //TODO : i think this should be moved to the server...
+            if (this.checkHitObjects()){
+                this.destroy();
+                return;
+            }
+        }
+
+        this.checkHitObjects = function(){
+            for (m in gameState.monsters){
+                if (utils.pointIntersectRect(this.point, gameState.monsters[m].rect)){
+                    gameState.monsters[m].hit(this);
+                    return true;
+                }
             }
         }
 
@@ -157,6 +197,11 @@ $(function(){
             }
 
             return false;
+        }
+
+        this.draw = function(){
+            context.fillStyle = this.color;
+            context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
         }
 
         this.destroy = function(){
@@ -181,10 +226,47 @@ $(function(){
     function Monster(x, y, color){
         this.x=x*Constants.tileSize;
         this.y=y*Constants.tileSize;
+        this.id = getUniqueID();
         this.W=8;
+        this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
+        this.HP = 25;
+        this.maxHP = 25;
         this.color = color;
 
         this.update = function(){
+            //this.move();
+            this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
+            this.renderHP();
+        }
+
+        this.renderHP = function(){
+            context.fillText(this.HP + " HP", this.x, this.y-5);
+        }
+
+        this.draw = function(){
+            context.fillStyle = this.color;
+            context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
+            this.renderHP();
+        }
+
+        this.hit = function(bullet){
+            this.HP -= bullet.DMG;
+
+            if (this.HP < 0){
+                this.destroy();
+            }
+        }
+
+        this.destroy = function(){
+            for (x in gameState.monsters) { 
+                if (gameState.monsters[x].id == this.id) { 
+                    gameState.monsters.splice(x, 1)
+                    break;
+                }
+            }
+        }
+
+        this.move = function(){
             var dx, dy;
             dx = ~~(Math.random()*4 - 2)*Constants.tileSize;
             dy = ~~(Math.random()*4 - 2)*Constants.tileSize;
@@ -195,7 +277,6 @@ $(function(){
                 this.x -= dx;
                 this.y -= dy;
             }
-
         }
 
         this.checkCollision = function(){
@@ -266,19 +347,13 @@ $(function(){
 
     function drawBullets(){
         for (b in gameState.bullets){
-            var cBul = gameState.bullets[b];
-            context.fillStyle = cBul.color;
-            context.fillRect(cBul.x-cBul.W/2, cBul.y-cBul.W/2, cBul.W, cBul.W);
-            cBul.update();
+            gameState.bullets[b].draw();
         }
     }
 
     function drawMonsters(){
         for (m in gameState.monsters){
-            var cMon = gameState.monsters[m];
-            context.fillStyle = cMon.color;
-            context.fillRect(cMon.x-cMon.W/2, cMon.y-cMon.W/2, cMon.W, cMon.W);
-            cMon.update();
+            gameState.monsters[m].draw();
         }
     }
 
@@ -286,6 +361,7 @@ $(function(){
         var b = new Bullet(curPlayer.x*W + W/2, curPlayer.y*W + W/2, "#000000", 12);
         console.log(gameState.bullets.length);
     }
+
     function updateLocal(){
         curPlayer.move();
         shootBullet();
@@ -358,6 +434,7 @@ $(function(){
     }
     /* Handle all game actions. This is called several times a second */
     function gameLoop(){
+        console.log(utils.pointIntersectRect(gameState.mouseX -Constants.distanceFrom00 , gameState.mouseY -Constants.distanceFrom00, curPlayer.x*W, curPlayer.y*W, curPlayer.x*W+W, curPlayer.y*W+W));
         state = {};
         getUpdatesFromServer();
         updateLocal();
@@ -373,4 +450,5 @@ $(function(){
         setInterval(gameLoop, Constants.refreshRate);
     }
     initialize();
+
 });
