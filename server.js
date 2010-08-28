@@ -1,9 +1,13 @@
+console.log(require('./lib/test').test_string);
+/*
 //setup Dependencies
-require(__dirname + "/lib/setup").ext(__dirname + "/lib").ext(__dirname + "/lib/express/support");
+require.paths.unshift(__dirname + "/lib");
+require.paths.unshift(__dirname + "/lib/express/support");
+//require(__dirname + "/lib/setup").ext(__dirname + "/lib").ext(__dirname + "/lib/express/support");
 var connect = require('connect')
     , express = require('express')
     , sys = require('sys')
-    , io = require('./lib/Socket.IO-node')
+    , io = require('Socket.IO-node')
     , port = 80;
 
 //Setup Express
@@ -92,3 +96,4 @@ function NotFound(msg) {
 
 
 console.log('Listening on http://0.0.0.0:' + port );
+*/
