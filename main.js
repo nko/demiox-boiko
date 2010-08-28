@@ -44,19 +44,20 @@ $(function(){
      */
 
     var Constants = {
+        tileSize : W,
         tilesAcross : 25,
         tilesUp : 25,
         widthPX : 25 * W,
         heightPX : 25 * W,
         refreshRate : 45,
     };
-
     var gameState = {
         keys : new Array(255),
         mouseX : 0,
         mouseY : 0,
         mouseDown : false,
         bullets : [],
+        monsters : [],
     };
 
         /*
@@ -77,13 +78,16 @@ $(function(){
         console.log(e.which);
         gameState.keys[e.which] = true;
     });
+
     $(document).keyup(function(e){ 
         gameState.keys[e.which] = false;
     });
+
     $(document).mousemove(function(e){
         gameState.mouseX = e.clientX;
         gameState.mouseY = e.clientY;
     });
+
     $(document).mousedown(function(e){
         gameState.mouseDown = false;
     });
@@ -103,12 +107,13 @@ $(function(){
      *
      * dx/dy should be normalized (squared they should add to 1).
      */
-    function Bullet(x, y, speed, dx, dy){
+    function Bullet(x, y, color, speed, dx, dy){
         this.x = x;
         this.y = y;
         this.W = 4;
         this.id = getUniqueID();
-        this.init = function(){ 
+        this.color = color;
+        this.init = function(){
             if (dx != undefined){
                 this.dx=dx;
                 this.dy=dy;
@@ -130,11 +135,11 @@ $(function(){
 
         this.update = function(){
             var destroy = false;
+            this.x += this.dx;
+            this.y += this.dy;
             if (this.checkCollisions()){
                 this.destroy();
             }
-            this.x += this.dx;
-            this.y += this.dy;
         }
 
         this.checkCollisions = function(){
@@ -157,12 +162,64 @@ $(function(){
         this.destroy = function(){
             for (x in gameState.bullets) { 
                 if (gameState.bullets[x].id == this.id) { 
-
                     gameState.bullets.splice(x, 1)
                     break;
                 }
             }
         }
+
+        this.init();
+    }
+
+    /*
+     * Monster.
+     *
+     * Initializes with an x and y position.
+     *
+     * TODO monster update code should be on server, not client!
+     */
+    function Monster(x, y, color){
+        this.x=x*Constants.tileSize;
+        this.y=y*Constants.tileSize;
+        this.W=8;
+        this.color = color;
+
+        this.update = function(){
+            var dx, dy;
+            dx = ~~(Math.random()*4 - 2)*Constants.tileSize;
+            dy = ~~(Math.random()*4 - 2)*Constants.tileSize;
+
+            this.x += dx;
+            this.y += dy;
+            if (this.checkCollision()){
+                this.x -= dx;
+                this.y -= dy;
+            }
+
+        }
+
+        this.checkCollision = function(){
+            if (utils.isWall(map[~~(this.x/W)][~~(this.y/W)])){
+                return true;
+            }
+
+            //TODO remove this once on server
+            if (this.x == curPlayer.x && this.y == curPlayer.y){
+                return true;
+            }
+
+            if (this.x < 0 || this.y < 0 || this.x > Constants.widthPX || this.y > Constants.heightPX){
+                return true;
+            }
+
+            return false;
+
+            //TODO check collision against all players, also.
+        }
+
+        this.init = function(){
+            gameState.monsters.push(this);
+        };
 
         this.init();
 
@@ -200,6 +257,7 @@ $(function(){
     function draw(){
         drawMap();
         drawBullets();
+        drawMonsters();
         curPlayer.draw();
         /*
         drawOtherCharacters();
@@ -209,14 +267,23 @@ $(function(){
     function drawBullets(){
         for (b in gameState.bullets){
             var cBul = gameState.bullets[b];
-            context.fillStyle = "#000000";
+            context.fillStyle = cBul.color;
             context.fillRect(cBul.x-cBul.W/2, cBul.y-cBul.W/2, cBul.W, cBul.W);
             cBul.update();
         }
     }
 
+    function drawMonsters(){
+        for (m in gameState.monsters){
+            var cMon = gameState.monsters[m];
+            context.fillStyle = cMon.color;
+            context.fillRect(cMon.x-cMon.W/2, cMon.y-cMon.W/2, cMon.W, cMon.W);
+            cMon.update();
+        }
+    }
+
     function shootBullet(){
-        var b = new Bullet(curPlayer.x*W + W/2, curPlayer.y*W + W/2, 12);
+        var b = new Bullet(curPlayer.x*W + W/2, curPlayer.y*W + W/2, "#000000", 12);
         console.log(gameState.bullets.length);
     }
     function updateLocal(){
@@ -264,8 +331,17 @@ $(function(){
      *   }
      */
 
+    /*
+     * Currently, we update everything client side because there is no server.
+     */
     function getUpdatesFromServer(){
 
+        for (b in gameState.bullets){
+            gameState.bullets[b].update();
+        }
+        for (m in gameState.monsters){
+            gameState.monsters[m].update();
+        }
     }
 
     /* 
@@ -290,6 +366,7 @@ $(function(){
     }
 
     function initialize(){
+        var m = new Monster(5, 5, "ff5555");
         for (var i=0;i<255;i++){
             gameState.keys[i]=false;
         }
