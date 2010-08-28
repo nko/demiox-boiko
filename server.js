@@ -1,9 +1,9 @@
 //setup Dependencies
 require(__dirname + "/lib/setup").ext(__dirname + "/lib").ext(__dirname + "/lib/express/support");
-var connect = require(__dirname + '/lib/express/support/connect/lib/connect')
-    , express = require('./lib/express/lib/express')
+var connect = require('connect')
+    , express = require('express')
     , sys = require('sys')
-    , io = require('./lib/Socket.IO-node')
+    , io = require('Socket.IO-node')
     , port = 80;
 
 //Setup Express
