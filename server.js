@@ -38,7 +38,7 @@ server.error(function(err, req, res, next){
                 } });
     }
 });
-server.listen( port);
+server.listen(port);
 
 //Setup Socket.IO
 var sock = io.listen(server);
