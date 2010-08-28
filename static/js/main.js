@@ -10,41 +10,11 @@ var sqrt = Math.sqrt,
     round = Math.round,
     min = Math.min,
     max = Math.max,
+    abs = Math.abs,
     random = Math.random;
 
-var map = dungen(25, 25, 3, 6, 10);
-/*
-var map = [ ".........................",
-            ".........................",
-            ".......#####.............",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            "..........#..............",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            "................#........",
-            ".........................", ];
-*/
+var map = dungen(90, 75, 10, 16, 40);
+
 /*
  * Random dungeon generator.
  * Transfer to server-side eventually.
@@ -54,9 +24,9 @@ var map = [ ".........................",
 function dungen(width, height, minSize, maxSize, numRooms) {
     // initialize map
     var map = [], room;
-    for (var y=0; y<height; y++) {
+    for (var x=0; x<width; x++) {
         var a = [];
-        for (var x=0; x<width; x++) {
+        for (var y=0; y<height; y++) {
             a.push('#');
         }
         map.push(a);
@@ -101,10 +71,10 @@ function dungen(width, height, minSize, maxSize, numRooms) {
 var Constants = {
     port : 80,
     tileSize : W,
-    tilesAcross : 25,
-    tilesUp : 25,
-    widthPX : 25 * W,
-    heightPX : 25 * W,
+    tilesAcross : 90,
+    tilesUp : 75,
+    widthPX : 90 * W,
+    heightPX : 75 * W,
     refreshRate : 45,
     distanceFrom00 : 5, //TODO make general
 };
@@ -339,16 +309,17 @@ function Monster(x, y, color) {
     this.color = color;
     this.ID = getUniqueID();
     this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
-    this.init();
+    gameState.monsters.push(this);
 }
 
 Monster.prototype = {
     W : 8,
     HP : 25,
     maxHP : 25,
+    aggroDist : 50,
     update :
         function() {
-            //this.move();
+            this.move();
             this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
             this.renderHP();
             if (random()>.8)
@@ -400,10 +371,18 @@ Monster.prototype = {
         },
     move :
         function() {
-            var dx, dy;
-            dx = floor(random()*4 - 2)*Constants.tileSize;
-            dy = floor(random()*4 - 2)*Constants.tileSize;
-
+            // TODO check all players to find closest player.
+            var dx = curPlayer.x - this.x;
+            var dy = curPlayer.y - this.y;
+            if (abs(dx) + abs(dy) < this.aggroDist) {
+                var v = utils.normalizeVect(dx, dy);
+                dx = v[0];
+                dy = v[1];
+            } else {
+                dx = floor(random()*4 - 2);
+                dy = floor(random()*4 - 2);
+            }
+            
             this.x += dx;
             this.y += dy;
             if (this.checkCollision()) {
@@ -429,10 +408,6 @@ Monster.prototype = {
             return false;
 
             //TODO check collision against all players, also.
-        },
-    init :
-        function() {
-            gameState.monsters.push(this);
         }
 };
 
@@ -491,7 +466,12 @@ function draw() {
     curPlayer.draw();
     drawOtherCharacters();
 }
-function drawOtherCharacters(){
+
+function drawFogOfWar() {
+    //curPlayer
+}
+
+function drawOtherCharacters() {
     for (c in gameState.players) {
         gameState.players[c].draw();
     }
@@ -518,7 +498,7 @@ function updateLocal() {
     shootBullet();
 }
 
-function drawMap() {
+function cacheMap() {
     for (var i=0;i<Constants.tilesAcross;i++) {
         for (var j=0;j<Constants.tilesUp;j++) {
             if (map[i][j] == ".")
@@ -530,6 +510,13 @@ function drawMap() {
             context.fillRect(i*W,j*W,W,W);
         }
     }
+    cacheMap.img = context.getImageData(0, 0, Constants.widthPX, Constants.heightPX);
+}
+cacheMap.img = undefined;
+
+function drawMap() {
+    if (cacheMap.img)
+        context.putImageData(cacheMap.img, 0, 0);
 }
 
 /*
@@ -626,6 +613,7 @@ function initialize() {
 $(function() {
     canv    = $('#main')[0];
     context = canv.getContext('2d');
+    cacheMap();
     /*
      * Handlers
      */
