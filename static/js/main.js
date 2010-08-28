@@ -346,6 +346,7 @@ Monster.prototype = {
  */
 var curPlayer = {
     x : 10,
+    id : getUniqueID(),
     y : 10,
     HP : 10,
     maxHP : 10,
@@ -503,9 +504,6 @@ function initialize() {
    gameState.socket.on('message', function(data){
      $('#reciever').append('<li>' + data + '</li>');  
    });
-
-
-
 
     var m = new Monster(5, 5, "ff5555");
     for (var i=0;i<255;i++) {
