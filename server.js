@@ -1,4 +1,9 @@
-console.log(require('./lib/test').test_string);
+var http = require('http');
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end(require('./lib/test').test_string + '\n');
+}).listen(80);
+console.log('Server running at http://0.0.0.0:80/');
 /*
 //setup Dependencies
 require.paths.unshift(__dirname + "/lib");
