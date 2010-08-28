@@ -145,15 +145,15 @@ function Bullet(x, y, color, speed, creator, dx, dy) {
     this.init();
 }
 Bullet.prototype = {
-    DMG : 1
-   ,W : 4
-   ,update :
+    DMG : 1,
+    W : 4,
+    update :
         function() {
             if (this.checkCollision()) {
                 this.destroy();
             }
-        }
-   ,checkCollision :
+        },
+    checkCollision :
         function() {
             var destroy = false;
             //Don't just check at the new position - check everywhere along that line, in increments of 1
@@ -180,8 +180,8 @@ Bullet.prototype = {
                     return true;
                 }
             }
-        }
-   ,checkHitObjects :
+        },
+    checkHitObjects :
         function() {
             for (m in gameState.monsters) {
                 if (utils.pointIntersectRect(this.point, gameState.monsters[m].rect) && gameState.monsters[m] != this.creator) {
@@ -198,8 +198,8 @@ Bullet.prototype = {
 
 
             return false
-        }
-   ,checkHarmlessCollision :
+        },
+    checkHarmlessCollision :
         function() {
             //Out of bounds?
             if (this.x > Constants.widthPX || this.x < 0 || this.y > Constants.heightPX || this.y < 0) {
@@ -215,13 +215,13 @@ Bullet.prototype = {
             }
 
             return false;
-        }
-   ,draw :
+        },
+    draw :
         function() {
             context.fillStyle = this.color;
             context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
-        }
-   ,destroy :
+        },
+    destroy :
         function() {
             for (x in gameState.bullets) { 
                 if (gameState.bullets[x].id == this.id) { 
@@ -239,8 +239,8 @@ Bullet.prototype = {
  * TODO monster update code should be on server, not client!
  */
 function Monster(x, y, color) {
-    this.x=x*Constants.tileSize;
-    this.y=y*Constants.tileSize;
+    this.x = x*Constants.tileSize;
+    this.y = y*Constants.tileSize;
     this.color = color;
     this.id = getUniqueID();
     this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
@@ -248,29 +248,29 @@ function Monster(x, y, color) {
 }
 
 Monster.prototype = {
-    W : 8
-   ,HP : 25
-   ,maxHP : 25
-   ,update :
+    W : 8,
+    HP : 25,
+    maxHP : 25,
+    update :
         function() {
             //this.move();
             this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
             this.renderHP();
             if (random()>.8)
                 this.fireBullet();
-        }
-   ,renderHP :
+        },
+    renderHP :
         function() {
             context.fillText(this.HP + " HP", this.x, this.y-5);
-        }
-   ,draw :
+        },
+    draw :
         function() {
             context.fillStyle = this.color;
             context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
             this.renderHP();
-        }
-        //TODO this should go onto the server :]
-   ,fireBullet :
+        },
+    //TODO this should go onto the server :]
+    fireBullet :
         function(seeking) {
             //If seeking - fire in the direction of a player.
             //
@@ -285,16 +285,16 @@ Monster.prototype = {
                 new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1], this);
             }
 
-        }
-   ,hit :
+        },
+    hit :
         function(bullet) {
             this.HP -= bullet.DMG;
 
-            if (this.HP < 0) {
+            if (this.HP <= 0) {
                 this.destroy();
             }
-        }
-   ,destroy :
+        },
+    destroy :
         function() {
             for (x in gameState.monsters) { 
                 if (gameState.monsters[x].id == this.id) { 
@@ -302,8 +302,8 @@ Monster.prototype = {
                     break;
                 }
             }
-        }
-   ,move :
+        },
+    move :
         function() {
             var dx, dy;
             dx = floor(random()*4 - 2)*Constants.tileSize;
@@ -315,8 +315,8 @@ Monster.prototype = {
                 this.x -= dx;
                 this.y -= dy;
             }
-        }
-   ,checkCollision :
+        },
+    checkCollision :
         function() {
             if (utils.isWall(map[floor(this.x/W)][floor(this.y/W)])) {
                 return true;
@@ -334,8 +334,8 @@ Monster.prototype = {
             return false;
 
             //TODO check collision against all players, also.
-        }
-   ,init :
+        },
+    init :
         function() {
             gameState.monsters.push(this);
         }
@@ -412,8 +412,7 @@ function shootBullet() {
 
 function updateLocal() {
     curPlayer.update();
-    if (gameState.mouseDown)
-        shootBullet();
+    shootBullet();
 }
 
 function drawMap() {
@@ -488,25 +487,17 @@ function gameLoop() {
 }
 
 function initialize() {
-
-   
-   io.setPath('/client/');
-   gameState.socket = new io.Socket(null, { 
-     port: 80
-     ,transports: ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']
-   });
-   gameState.socket.connect();
+    io.setPath('/client/');
+    gameState.socket = new io.Socket(null, { 
+        port: 80,
+        transports: ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']
+    });
+    gameState.socket.connect();
     
-   //$('#sender').bind('click', function() {
-   //});
-   
-   gameState.socket.on('message', function(data){
-     $('#reciever').append('<li>' + data + '</li>');  
-   });
-
-
-
-
+    gameState.socket.on('message', function(data) {
+        $('#reciever').append('<li>' + data + '</li>');
+    });
+    
     var m = new Monster(5, 5, "ff5555");
     for (var i=0;i<255;i++) {
         gameState.keys[i]=false;

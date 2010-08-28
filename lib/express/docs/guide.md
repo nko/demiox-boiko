@@ -172,7 +172,7 @@ and middleware continue to be invoked.
 
 ### Middleware
 
-The Express _Plugin_ is no more! middleware via [Connect](http://github.com/extjs/Connect) can be
+The Express _Plugin_ is no more! middleware via [Connect](http://github.com/senchalabs/connect) can be
 passed to _express.createServer()_ as you would with a regular Connect server. For example:
 
 	var express = require('express');
@@ -334,14 +334,14 @@ for free:
 
   * _firstInCollection_  True if this is the first object
   * _indexInCollection_  Index of the object in the collection
-  * _lastInCollection _  True if this is the last object
+  * _lastInCollection_  True if this is the last object
 
 ### Template Engines
 
 Below are a few template engines commonly used with Express:
 
-  * [Jade](http://github.com/visionmedia/jade) haml.js successor
-  * [Haml](http://github.com/visionmedia/haml.js) indented templates
+  * [Jade](http://jade-lang.com) haml.js successor
+  * [Haml](http://github.com/visionmedia/haml.js) pythonic indented templates
   * [EJS](http://github.com/visionmedia/ejs) Embedded JavaScript
 
 ### req.header(key[, defaultValue])
@@ -405,6 +405,10 @@ Queue flash _msg_ of the given _type_.
 
     req.flash();
     // => { error: ['email delivery failed'], info: [] }
+
+Flash notification message may also utilize formatters, by default only the %s string formatter is available:
+
+    req.flash('info', 'email delivery to _%s_ from _%s_ failed.', toUser, fromUser);
 
 ### req.isXMLHttpRequest
 

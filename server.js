@@ -61,9 +61,9 @@ sock.on('connection', function(client) {
 ///////////////////////////////////////////
 
 /////// ADD ALL YOUR ROUTES HERE  /////////
-
+/*
 server.get('/', function(req,res) {
-  /*res.render('index.ejs', {
+  res.render('index.ejs', {
     locals : { 
               header: '#Header#'
              ,footer: '#Footer#'
@@ -72,7 +72,7 @@ server.get('/', function(req,res) {
              ,author: 'Your Name'
              ,analyticssiteid: 'XXXXXXX' 
             }
-  }); */
+  });
     res.render('woot.html', {
         locals : { 
                     header          : 'This is a header.'
@@ -101,5 +101,5 @@ function NotFound(msg) {
     Error.call(this, msg);
     Error.captureStackTrace(this, arguments.callee);
 }
-
+*/
 console.log('Listening on http://0.0.0.0:' + port );
