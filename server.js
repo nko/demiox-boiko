@@ -4,8 +4,16 @@ var connect = require('connect')
     , express = require('express')
     , sys = require('sys')
     , io = require('Socket.IO-node')
+    , ejs = require('ejs')
     , port = 80;
 
+var http = require('http');
+
+http.createServer(function (request, response) {
+  response.writeHead(200, {'Content-Type': 'text/plain'});
+  response.end('Hello World\n');
+}).listen(80);
+/*
 //Setup Express
 var server = express.createServer();
 server.configure(function(){
@@ -92,3 +100,4 @@ function NotFound(msg) {
 
 
 console.log('Listening on http://0.0.0.0:' + port );
+*/
