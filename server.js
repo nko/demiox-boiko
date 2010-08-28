@@ -4,7 +4,6 @@ var connect = require('connect')
     , express = require('express')
     , sys = require('sys')
     , io = require('Socket.IO-node')
-    , ejs = require('ejs')
     , port = 80;
 
 var http = require('http');
