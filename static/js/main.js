@@ -205,8 +205,8 @@ Bullet.prototype = {
                 return true;
             }
 
-            this.mapX = ~~(this.x / W);
-            this.mapY = ~~(this.y / W);
+            this.mapX = floor(this.x / W);
+            this.mapY = floor(this.y / W);
 
             //Intersection with wall?
             if (utils.isWall(map[this.mapX][this.mapY])) {
@@ -240,104 +240,105 @@ Bullet.prototype = {
 function Monster(x, y, color) {
     this.x=x*Constants.tileSize;
     this.y=y*Constants.tileSize;
-    this.id = getUniqueID();
-    this.W=8;
-    this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
-    this.HP = 25;
-    this.maxHP = 25;
     this.color = color;
+    this.id = getUniqueID();
+    this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
+    this.init();
+}
 
-    this.update = function() {
-        //this.move();
-        this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
-        this.renderHP();
-        if (random()>.8)
-            this.fireBullet();
-    }
-
-    this.renderHP = function() {
-        context.fillText(this.HP + " HP", this.x, this.y-5);
-    }
-
-    this.draw = function() {
-        context.fillStyle = this.color;
-        context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
-        this.renderHP();
-    }
-
-    //TODO this should go onto the server :]
-    this.fireBullet = function(seeking) {
-        //If seeking - fire in the direction of a player.
-        //
-        //Otherwise, fire in a random direction.
-
-        if (seeking) {
-
-        } else {
-            //Choose a random direction to go in.
-            var v = utils.normalizeVect(~~(random()*3)-1, ~~(random()*3)-1);
-
-            new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1], this);
+Monster.prototype = {
+    W : 8
+   ,HP : 25
+   ,maxHP : 25
+   ,update :
+        function() {
+            //this.move();
+            this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
+            this.renderHP();
+            if (random()>.8)
+                this.fireBullet();
         }
-
-    }
-
-    this.hit = function(bullet) {
-        this.HP -= bullet.DMG;
-
-        if (this.HP < 0) {
-            this.destroy();
+   ,renderHP :
+        function() {
+            context.fillText(this.HP + " HP", this.x, this.y-5);
         }
-    }
+   ,draw :
+        function() {
+            context.fillStyle = this.color;
+            context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
+            this.renderHP();
+        }
+        //TODO this should go onto the server :]
+   ,fireBullet :
+        function(seeking) {
+            //If seeking - fire in the direction of a player.
+            //
+            //Otherwise, fire in a random direction.
 
-    this.destroy = function() {
-        for (x in gameState.monsters) { 
-            if (gameState.monsters[x].id == this.id) { 
-                gameState.monsters.splice(x, 1)
-                break;
+            if (seeking) {
+
+            } else {
+                //Choose a random direction to go in.
+                var v = utils.normalizeVect(floor(random()*3)-1, floor(random()*3)-1);
+
+                new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1], this);
+            }
+
+        }
+   ,hit :
+        function(bullet) {
+            this.HP -= bullet.DMG;
+
+            if (this.HP < 0) {
+                this.destroy();
             }
         }
-    }
-
-    this.move = function() {
-        var dx, dy;
-        dx = ~~(random()*4 - 2)*Constants.tileSize;
-        dy = ~~(random()*4 - 2)*Constants.tileSize;
-
-        this.x += dx;
-        this.y += dy;
-        if (this.checkCollision()) {
-            this.x -= dx;
-            this.y -= dy;
+   ,destroy :
+        function() {
+            for (x in gameState.monsters) { 
+                if (gameState.monsters[x].id == this.id) { 
+                    gameState.monsters.splice(x, 1)
+                    break;
+                }
+            }
         }
-    }
+   ,move :
+        function() {
+            var dx, dy;
+            dx = floor(random()*4 - 2)*Constants.tileSize;
+            dy = floor(random()*4 - 2)*Constants.tileSize;
 
-    this.checkCollision = function() {
-        if (utils.isWall(map[~~(this.x/W)][~~(this.y/W)])) {
-            return true;
+            this.x += dx;
+            this.y += dy;
+            if (this.checkCollision()) {
+                this.x -= dx;
+                this.y -= dy;
+            }
         }
+   ,checkCollision :
+        function() {
+            if (utils.isWall(map[floor(this.x/W)][floor(this.y/W)])) {
+                return true;
+            }
 
-        //TODO remove this once on server
-        if (this.x == curPlayer.x && this.y == curPlayer.y) {
-            return true;
+            //TODO remove this once on server
+            if (this.x == curPlayer.x && this.y == curPlayer.y) {
+                return true;
+            }
+
+            if (this.x < 0 || this.y < 0 || this.x > Constants.widthPX || this.y > Constants.heightPX) {
+                return true;
+            }
+
+            return false;
+
+            //TODO check collision against all players, also.
         }
-
-        if (this.x < 0 || this.y < 0 || this.x > Constants.widthPX || this.y > Constants.heightPX) {
-            return true;
+   ,init :
+        function() {
+            gameState.monsters.push(this);
         }
-
-        return false;
-
-        //TODO check collision against all players, also.
-    }
-
-    this.init = function() {
-        gameState.monsters.push(this);
-    };
-
-    this.init();
-
-}
+};
 
 /*
  * Current character 
@@ -422,7 +423,7 @@ function drawMap() {
             else if (map[i][j] == "#")
                 context.fillStyle = "#333333";
             else
-                context.fillStyle = "#" + ~~(random() * 999999);
+                context.fillStyle = "#" + floor(random() * 999999);
             context.fillRect(i*W,j*W,W,W);
         }
     }
@@ -439,7 +440,7 @@ function drawMap() {
  *
  */
 function getUniqueID() {
-    return ~~(random()*1e20); //Mathematically sound
+    return floor(random()*1e20); //Mathematically sound
 }
 
 /*
