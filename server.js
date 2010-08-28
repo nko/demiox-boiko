@@ -1,4 +1,5 @@
 //setup Dependencies
+
 require(__dirname + "/lib/setup").ext(__dirname + "/lib").ext(__dirname + "/lib/express/support");
 var connect = require('connect')
     , express = require('express')
@@ -45,6 +46,7 @@ var sock = io.listen(server);
 sock.on('connection', function(client) {
 	console.log('Client Connected');
 	client.on('message', function(message) {
+        console.log(message + " received.");
 		client.broadcast(message);
 		client.send(message);
 	});
@@ -61,7 +63,7 @@ sock.on('connection', function(client) {
 /////// ADD ALL YOUR ROUTES HERE  /////////
 
 server.get('/', function(req,res) {
-  res.render('index.ejs', {
+  /*res.render('index.ejs', {
     locals : { 
               header: '#Header#'
              ,footer: '#Footer#'
@@ -70,7 +72,17 @@ server.get('/', function(req,res) {
              ,author: 'Your Name'
              ,analyticssiteid: 'XXXXXXX' 
             }
-  });
+  }); */
+    res.render('woot.html', {
+        locals : { 
+                    header          : 'This is a header.'
+                   ,footer          : 'This is a footer?'
+                   ,title           : 'gunpixel'
+                   ,description     : 'an awesome game'
+                   ,author          : 'sarenji && johnfn'
+                   ,analyticssiteid : 'XXXXXXX' 
+                 }
+    });
 });
 
 

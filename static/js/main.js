@@ -65,6 +65,7 @@ var gameState = {
     mouseDown : false,
     bullets : [],
     monsters : [],
+    socket : undefined,
 };
 
 /*
@@ -487,6 +488,25 @@ function gameLoop() {
 }
 
 function initialize() {
+
+   
+   io.setPath('/client/');
+   gameState.socket = new io.Socket(null, { 
+     port: 80
+     ,transports: ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']
+   });
+   gameState.socket.connect();
+    
+   //$('#sender').bind('click', function() {
+   //});
+   
+   gameState.socket.on('message', function(data){
+     $('#reciever').append('<li>' + data + '</li>');  
+   });
+
+
+
+
     var m = new Monster(5, 5, "ff5555");
     for (var i=0;i<255;i++) {
         gameState.keys[i]=false;
@@ -509,6 +529,7 @@ $(function() {
         gameState.mouseX = e.clientX;
         gameState.mouseY = e.clientY;
     }).mousedown(function(e) {
+        gameState.socket.send("Fire bullet!");     
         gameState.mouseDown = true;
     }).mouseup(function(e) {
         gameState.mouseDown = false;
