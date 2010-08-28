@@ -1,6 +1,6 @@
 //setup Dependencies
 require(__dirname + "/lib/setup").ext(__dirname + "/lib").ext(__dirname + "/lib/express/support");
-var connect = require('./lib/express/support/connect/lib/connect')
+var connect = require(__dirname + '/lib/express/support/connect/lib/connect')
     , express = require('./lib/express/lib/express')
     , sys = require('sys')
     , io = require('./lib/Socket.IO-node')
