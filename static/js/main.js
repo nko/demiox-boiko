@@ -13,6 +13,8 @@ var sqrt = Math.sqrt,
     max = Math.max,
     random = Math.random;
 
+var map = dungen(25, 25, 3, 6, 10);
+/*
 var map = [ ".........................",
             ".........................",
             ".......#####.............",
@@ -43,12 +45,60 @@ var map = [ ".........................",
             ".........................",
             "................#........",
             ".........................", ];
-
+*/
+/*
+ * Random dungeon generator.
+ * Transfer to server-side eventually.
+ * (width, height) = size of dungeon.
+ * (minSize, maxSize) = room sizes.
+ */
+function dungen(width, height, minSize, maxSize, numRooms) {
+    // initialize map
+    var map = [], room;
+    for (var y=0; y<height; y++) {
+        var a = [];
+        for (var x=0; x<width; x++) {
+            a.push('#');
+        }
+        map.push(a);
+    }
+    // generate rooms
+    var rooms = [];
+    for (var i=0; i<numRooms; i++) {
+        var w = floor(random()*(maxSize-minSize+1)) + minSize;
+        var h = floor(random()*(maxSize-minSize+1)) + minSize;
+        var x = floor(random()*(width - w));
+        var y = floor(random()*(height - h));
+        rooms.push({ x: x, y: y, w: w, h: h});
+    }
+    // slap rooms onto map like a can of paint
+    for (var i=0; i<numRooms; i++) {
+        var r = rooms[i];
+        for (var y=r.y; y<r.y+r.h; y++) {
+            for (var x=r.x; x<r.x+r.w; x++) {
+                map[y][x] = '.';
+            }
+        }
+    }
+    // connect rooms with hallways
+    var room = rooms.pop();
+    while (rooms.length) {
+        var r = rooms.pop(), x=r.x, y=r.y;
+        while (x != room.x) {
+            x += (room.x - x > 0) ? 1 : -1;
+            map[y][x] = '.';
+        }
+        while (y != room.y) {
+            y += (room.y - y > 0) ? 1 : -1;
+            map[y][x] = '.';
+        }
+    }
+    return map;
+}
 
 /*
  * Static objects
  */
-
 var Constants = {
     tileSize : W,
     tilesAcross : 25,
@@ -346,7 +396,6 @@ Monster.prototype = {
  */
 var curPlayer = {
     x : 10,
-    id : getUniqueID(),
     y : 10,
     HP : 10,
     maxHP : 10,
@@ -499,13 +548,6 @@ function initialize() {
         $('#reciever').append('<li>' + data + '</li>');
     });
     
-   //$('#sender').bind('click', function() {
-   //});
-   
-   gameState.socket.on('message', function(data){
-     $('#reciever').append('<li>' + data + '</li>');  
-   });
-
     var m = new Monster(5, 5, "ff5555");
     for (var i=0;i<255;i++) {
         gameState.keys[i]=false;
