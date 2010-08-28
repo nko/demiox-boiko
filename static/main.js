@@ -80,6 +80,8 @@ $(function(){
         //Returns an array [x,y] of the normalized vector.
         normalizeVect :
             function (x, y){
+                if (x==0) x = .1;
+                if (y==0) y = .1;
                 var hyp = Math.sqrt(x*x + y*y);
                 return [x/hyp, y/hyp];
             }
@@ -164,24 +166,35 @@ $(function(){
         }
 
         this.update = function(){
+            if (this.checkCollision()){
+                this.destroy();
+            }
+        }
+        this.checkCollision = function(){
             var destroy = false;
-            this.x += this.dx;
-            this.y += this.dy;
-            this.point = new Point(this.x, this.y);
+            //Don't just check at the new position - check everywhere along that line, in increments of 1
+            var startX = this.x;
+            var startY = this.y;
+            var big = Math.max(this.x, this.y);
+            for (var i=0;i<=big;i++) { 
+                this.x = startX + this.dx * i / big;
+                this.y = startY + this.dy * i / big;
+                this.point = new Point(this.x, this.y);
 
-            if (this.checkCollisions()){
-                this.destroy();
-                return;
-            }
-            //TODO : i think this should be moved to the server...
-            if (this.checkHitObjects()){
-                this.destroy();
-                return;
-            }
+                //TODO special handling collision code?
+                if (this.checkHarmlessCollision()){
+                    return true;
+                }
+                //TODO : i think this should be moved to the server...
+                if (this.checkHitObjects()){
+                    return true;
+                }
 
-            //TODO and when i do this, remove this entirely.
-            if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator){
-                console.log("Ouch.");
+                //TODO and when i do this, remove this entirely.
+                if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator){
+                    console.log("Ouch.");
+                    return true;
+                }
             }
         }
 
@@ -192,9 +205,18 @@ $(function(){
                     return true;
                 }
             }
+            
+            //TODO should be replaced with all players
+            if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator){
+                curPlayer.hit(this);
+                return true;
+            }
+
+
+            return false
         }
 
-        this.checkCollisions = function(){
+        this.checkHarmlessCollision = function(){
             //Out of bounds?
             if (this.x > Constants.widthPX || this.x < 0 || this.y > Constants.heightPX || this.y < 0){
                 return true;
@@ -275,7 +297,7 @@ $(function(){
                 //Choose a random direction to go in.
                 var v = utils.normalizeVect(~~(Math.random()*3)-1, ~~(Math.random()*3)-1);
 
-                new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1]);
+                new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1], this);
             }
 
         }
@@ -345,6 +367,10 @@ $(function(){
         y : 10,
         HP : 10,
         maxHP : 10,
+        hit : function(bullet){
+            this.HP -= bullet.DMG;
+            console.log(this.HP);
+        },
         update : function(){
             var dx = gameState.keys[68] - gameState.keys[65];
             var dy = gameState.keys[83] - gameState.keys[87];
@@ -357,7 +383,16 @@ $(function(){
         draw : function(){ 
             context.fillStyle = "5555ff";
             context.fillRect(curPlayer.x*W, curPlayer.y*W, W, W);
+            this.writeStatus();
         },
+        destroy : function(){
+            //TODO send message to server
+            //
+            //TODO prompt player to restart
+        },
+        writeStatus : function(){
+            $("#status").html("HP: " + this.HP + "/" + this.maxHP);
+        }, 
         checkCollisions : function(dx, dy){
             return utils.isWall(map[this.x + dx][this.y + dy]);
         },
@@ -390,8 +425,7 @@ $(function(){
     }
 
     function shootBullet(){
-        var b = new Bullet(curPlayer.x*W + W/2, curPlayer.y*W + W/2, "#000000", 12, this);
-        console.log(gameState.bullets.length);
+        var b = new Bullet(curPlayer.x*W + W/2, curPlayer.y*W + W/2, "#000000", 12, curPlayer); //TODO curplayer->ID
     }
 
     function updateLocal(){
@@ -466,7 +500,6 @@ $(function(){
     }
     /* Handle all game actions. This is called several times a second */
     function gameLoop(){
-        console.log(utils.pointIntersectRect(gameState.mouseX -Constants.distanceFrom00 , gameState.mouseY -Constants.distanceFrom00, curPlayer.x*W, curPlayer.y*W, curPlayer.x*W+W, curPlayer.y*W+W));
         state = {};
         getUpdatesFromServer();
         updateLocal();
