@@ -76,6 +76,12 @@ $(function(){
             function (point, rect){
                 return  (point.x >= rect.x1 && point.x <= rect.x2 &&
                          point.y >= rect.y1 && point.y <= rect.y2 );
+            },
+        //Returns an array [x,y] of the normalized vector.
+        normalizeVect :
+            function (x, y){
+                var hyp = Math.sqrt(x*x + y*y);
+                return [x/hyp, y/hyp];
             }
     };
 
@@ -128,7 +134,7 @@ $(function(){
      *
      * dx/dy should be normalized (squared they should add to 1).
      */
-    function Bullet(x, y, color, speed, dx, dy){
+    function Bullet(x, y, color, speed, creator, dx, dy){
         this.DMG = 1;
         this.x = x;
         this.y = y;
@@ -136,6 +142,7 @@ $(function(){
         this.W = 4;
         this.id = getUniqueID();
         this.color = color;
+        this.creator = creator;
         this.init = function(){
             if (dx != undefined){
                 this.dx=dx;
@@ -171,11 +178,16 @@ $(function(){
                 this.destroy();
                 return;
             }
+
+            //TODO and when i do this, remove this entirely.
+            if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator){
+                console.log("Ouch.");
+            }
         }
 
         this.checkHitObjects = function(){
             for (m in gameState.monsters){
-                if (utils.pointIntersectRect(this.point, gameState.monsters[m].rect)){
+                if (utils.pointIntersectRect(this.point, gameState.monsters[m].rect) && gameState.monsters[m] != this.creator){
                     gameState.monsters[m].hit(this);
                     return true;
                 }
@@ -237,6 +249,8 @@ $(function(){
             //this.move();
             this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
             this.renderHP();
+            if (Math.random()>.8)
+                this.fireBullet();
         }
 
         this.renderHP = function(){
@@ -247,6 +261,23 @@ $(function(){
             context.fillStyle = this.color;
             context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
             this.renderHP();
+        }
+
+        //TODO this should go onto the server :]
+        this.fireBullet = function(seeking){
+            //If seeking - fire in the direction of a player.
+            //
+            //Otherwise, fire in a random direction.
+
+            if (seeking){
+
+            } else {
+                //Choose a random direction to go in.
+                var v = utils.normalizeVect(~~(Math.random()*3)-1, ~~(Math.random()*3)-1);
+
+                new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1]);
+            }
+
         }
 
         this.hit = function(bullet){
@@ -314,13 +345,14 @@ $(function(){
         y : 10,
         HP : 10,
         maxHP : 10,
-        move : function(){
+        update : function(){
             var dx = gameState.keys[68] - gameState.keys[65];
             var dy = gameState.keys[83] - gameState.keys[87];
             if (!this.checkCollisions(dx, dy)){
                 this.x += dx;
                 this.y += dy;
             }
+            this.rect = new Rect(this.x*W, this.y*W, this.x*W + W, this.y*W + W);
         },
         draw : function(){ 
             context.fillStyle = "5555ff";
@@ -358,12 +390,12 @@ $(function(){
     }
 
     function shootBullet(){
-        var b = new Bullet(curPlayer.x*W + W/2, curPlayer.y*W + W/2, "#000000", 12);
+        var b = new Bullet(curPlayer.x*W + W/2, curPlayer.y*W + W/2, "#000000", 12, this);
         console.log(gameState.bullets.length);
     }
 
     function updateLocal(){
-        curPlayer.move();
+        curPlayer.update();
         shootBullet();
     }
 
