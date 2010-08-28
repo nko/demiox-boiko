@@ -1,14 +1,5 @@
-var http = require('http');
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end(require('./lib/test').test_string + '\n');
-}).listen(80);
-console.log('Server running at http://0.0.0.0:80/');
-/*
 //setup Dependencies
-require.paths.unshift(__dirname + "/lib");
-require.paths.unshift(__dirname + "/lib/express/support");
-//require(__dirname + "/lib/setup").ext(__dirname + "/lib").ext(__dirname + "/lib/express/support");
+require(__dirname + "/lib/setup").ext(__dirname + "/lib").ext(__dirname + "/lib/express/support");
 var connect = require('connect')
     , express = require('express')
     , sys = require('sys')
@@ -101,4 +92,3 @@ function NotFound(msg) {
 
 
 console.log('Listening on http://0.0.0.0:' + port );
-*/
