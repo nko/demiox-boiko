@@ -1,5 +1,4 @@
 //setup Dependencies
-require.paths.push('~/.node_libraries');
 require("./lib/setup").ext("./lib").ext("./lib/express/support");
 var connect = require('connect')
     , express = require('express')
