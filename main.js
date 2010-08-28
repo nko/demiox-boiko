@@ -48,6 +48,7 @@ $(function(){
         tilesUp : 25,
         widthPX : 25 * W,
         heightPX : 25 * W,
+        refreshRate : 45,
     };
 
     var gameState = {
@@ -58,13 +59,16 @@ $(function(){
         bullets : [],
     };
 
-    var curPlayer = {
-        x : 10,
-        y : 10,
-        HP : 10,
-        maxHP : 10,
+        /*
+         * Utility functions
+         */
+    var utils = {
+        isWall : 
+            function(x){
+                return walls.indexOf(x) != -1;
+            },
     };
-    
+
     /*
      * Handlers
      */
@@ -83,6 +87,7 @@ $(function(){
     $(document).mousedown(function(e){
         gameState.mouseDown = false;
     });
+
 
     /*
      * Dynamic objects
@@ -125,20 +130,28 @@ $(function(){
 
         this.update = function(){
             var destroy = false;
-            this.x += this.dx;
-            this.y += this.dy;
-            //Out of bounds?
-            if (this.x > Constants.widthPX || this.x < 0 || this.y > Constants.heightPX || this.y < 0){
-                destroy = true;
-            }
-
-            //TODO check collisions
-
-
-
-            if (destroy){
+            if (this.checkCollisions()){
                 this.destroy();
             }
+            this.x += this.dx;
+            this.y += this.dy;
+        }
+
+        this.checkCollisions = function(){
+            //Out of bounds?
+            if (this.x > Constants.widthPX || this.x < 0 || this.y > Constants.heightPX || this.y < 0){
+                return true;
+            }
+
+            this.mapX = ~~(this.x / W);
+            this.mapY = ~~(this.y / W);
+
+            //Intersection with wall?
+            if (utils.isWall(map[this.mapX][this.mapY])){
+                return true;
+            }
+
+            return false;
         }
 
         this.destroy = function(){
@@ -155,6 +168,30 @@ $(function(){
 
     }
 
+    /*
+     * Current character 
+     */
+    var curPlayer = {
+        x : 10,
+        y : 10,
+        HP : 10,
+        maxHP : 10,
+        move : function(){
+            var dx = gameState.keys[68] - gameState.keys[65];
+            var dy = gameState.keys[83] - gameState.keys[87];
+            if (!this.checkCollisions(dx, dy)){
+                this.x += dx;
+                this.y += dy;
+            }
+        },
+        draw : function(){ 
+            context.fillStyle = "5555ff";
+            context.fillRect(curPlayer.x*W, curPlayer.y*W, W, W);
+        },
+        checkCollisions : function(dx, dy){
+            return utils.isWall(map[this.x + dx][this.y + dy]);
+        },
+    }
 
 
     /*
@@ -163,7 +200,7 @@ $(function(){
     function draw(){
         drawMap();
         drawBullets();
-        drawCurPlayer();
+        curPlayer.draw();
         /*
         drawOtherCharacters();
         */
@@ -178,30 +215,22 @@ $(function(){
         }
     }
 
-    function movePlayer(){
-        curPlayer.y += gameState.keys[83] - gameState.keys[87];
-        curPlayer.x += gameState.keys[68] - gameState.keys[65];
-        //TODO collision detection =)
-
-    }
     function shootBullet(){
-        var b = new Bullet(curPlayer.x*W, curPlayer.y*W, 12);
+        var b = new Bullet(curPlayer.x*W + W/2, curPlayer.y*W + W/2, 12);
         console.log(gameState.bullets.length);
     }
     function updateLocal(){
-        movePlayer();
+        curPlayer.move();
         shootBullet();
     }
 
-    function drawCurPlayer(){
-        context.fillStyle = "5555ff";
-        context.fillRect(curPlayer.x*W, curPlayer.y*W, W, W);
-    }
     function drawMap(){
         for (var i=0;i<Constants.tilesAcross;i++){
             for (var j=0;j<Constants.tilesUp;j++){
                 if (map[i][j] == ".")
                     context.fillStyle = "#55ff55";
+                else if (map[i][j] == "#")
+                    context.fillStyle = "#333333";
                 else
                     context.fillStyle = "#" + ~~(Math.random() * 999999);
                 context.fillRect(i*W,j*W,W,W);
@@ -264,7 +293,7 @@ $(function(){
         for (var i=0;i<255;i++){
             gameState.keys[i]=false;
         }
-        setInterval(gameLoop, 100);
+        setInterval(gameLoop, Constants.refreshRate);
     }
     initialize();
 });
