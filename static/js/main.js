@@ -5,9 +5,17 @@ var walls = "#"; //Can't walk on these
 
 var state = {};
 
+// This is actually faster.
+var sqrt = Math.sqrt,
+    floor = Math.floor,
+    round = Math.round,
+    min = Math.min,
+    max = Math.max,
+    random = Math.random;
+
 var map = [ ".........................",
             ".........................",
-            ".........................",
+            ".......#####.............",
             ".........................",
             ".........................",
             ".........................",
@@ -33,7 +41,7 @@ var map = [ ".........................",
             ".........................",
             ".........................",
             ".........................",
-            ".........................",
+            "................#........",
             ".........................", ];
 
 
@@ -77,9 +85,9 @@ var utils = {
     //Returns an array [x,y] of the normalized vector.
     normalizeVect :
         function (x, y) {
-            if (x==0) x = .1;
-            if (y==0) y = .1;
-            var hyp = Math.sqrt(x*x + y*y);
+            var hyp = sqrt(x*x + y*y);
+            if (hyp === 0)
+                return [0, 0];
             return [x/hyp, y/hyp];
         }
 };
@@ -111,14 +119,12 @@ function Point(x, y) {
  * dx/dy should be normalized (squared they should add to 1).
  */
 function Bullet(x, y, color, speed, creator, dx, dy) {
-    this.DMG = 1;
     this.x = x;
     this.y = y;
-    this.point = new Point(x, y);
-    this.W = 4;
-    this.id = getUniqueID();
+    this.point = new Point(x,y);
     this.color = color;
     this.creator = creator;
+    this.id = getUniqueID();
     this.init = function() {
         if (dx != undefined) {
             this.dx=dx;
@@ -127,103 +133,103 @@ function Bullet(x, y, color, speed, creator, dx, dy) {
         } else {
             var dxfar = gameState.mouseX - this.x;
             var dyfar = gameState.mouseY - this.y;
-
-            if (dxfar == 0) dxfar = .1;
-            if (dyfar == 0) dyfar = .1; //Prevent div by 0 or other awkward things from happening
-
-            var hyp = Math.sqrt(dxfar * dxfar + dyfar * dyfar);
-
-            this.dx = (dxfar / hyp)*speed;
-            this.dy = (dyfar / hyp)*speed;
+            var hyp = sqrt(dxfar * dxfar + dyfar * dyfar);
+            if (hyp !== 0) {
+                this.dx = (dxfar / hyp)*speed;
+                this.dy = (dyfar / hyp)*speed;
+            }
         }
         gameState.bullets.push(this);
     }
-
-    this.update = function() {
-        if (this.checkCollision()) {
-            this.destroy();
-        }
-    }
-    this.checkCollision = function() {
-        var destroy = false;
-        //Don't just check at the new position - check everywhere along that line, in increments of 1
-        var startX = this.x;
-        var startY = this.y;
-        var big = Math.max(this.x, this.y);
-        for (var i=0;i<=big;i++) { 
-            this.x = startX + this.dx * i / big;
-            this.y = startY + this.dy * i / big;
-            this.point = new Point(this.x, this.y);
-
-            //TODO special handling collision code?
-            if (this.checkHarmlessCollision()) {
-                return true;
-            }
-            //TODO : i think this should be moved to the server...
-            if (this.checkHitObjects()) {
-                return true;
-            }
-
-            //TODO and when i do this, remove this entirely.
-            if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator) {
-                console.log("Ouch.");
-                return true;
-            }
-        }
-    }
-
-    this.checkHitObjects = function() {
-        for (m in gameState.monsters) {
-            if (utils.pointIntersectRect(this.point, gameState.monsters[m].rect) && gameState.monsters[m] != this.creator) {
-                gameState.monsters[m].hit(this);
-                return true;
-            }
-        }
-        
-        //TODO should be replaced with all players
-        if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator) {
-            curPlayer.hit(this);
-            return true;
-        }
-
-
-        return false
-    }
-
-    this.checkHarmlessCollision = function() {
-        //Out of bounds?
-        if (this.x > Constants.widthPX || this.x < 0 || this.y > Constants.heightPX || this.y < 0) {
-            return true;
-        }
-
-        this.mapX = ~~(this.x / W);
-        this.mapY = ~~(this.y / W);
-
-        //Intersection with wall?
-        if (utils.isWall(map[this.mapX][this.mapY])) {
-            return true;
-        }
-
-        return false;
-    }
-
-    this.draw = function() {
-        context.fillStyle = this.color;
-        context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
-    }
-
-    this.destroy = function() {
-        for (x in gameState.bullets) { 
-            if (gameState.bullets[x].id == this.id) { 
-                gameState.bullets.splice(x, 1)
-                break;
-            }
-        }
-    }
-
     this.init();
 }
+Bullet.prototype = {
+    DMG : 1
+   ,W : 4
+   ,update :
+        function() {
+            if (this.checkCollision()) {
+                this.destroy();
+            }
+        }
+   ,checkCollision :
+        function() {
+            var destroy = false;
+            //Don't just check at the new position - check everywhere along that line, in increments of 1
+            var startX = this.x;
+            var startY = this.y;
+            var big = max(this.x, this.y);
+            for (var i=0;i<=big;i++) { 
+                this.x = startX + this.dx * i / big;
+                this.y = startY + this.dy * i / big;
+                this.point = new Point(this.x, this.y);
 
+                //TODO special handling collision code?
+                if (this.checkHarmlessCollision()) {
+                    return true;
+                }
+                //TODO : i think this should be moved to the server...
+                if (this.checkHitObjects()) {
+                    return true;
+                }
+
+                //TODO and when i do this, remove this entirely.
+                if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator) {
+                    console.log("Ouch.");
+                    return true;
+                }
+            }
+        }
+   ,checkHitObjects :
+        function() {
+            for (m in gameState.monsters) {
+                if (utils.pointIntersectRect(this.point, gameState.monsters[m].rect) && gameState.monsters[m] != this.creator) {
+                    gameState.monsters[m].hit(this);
+                    return true;
+                }
+            }
+
+            //TODO should be replaced with all players
+            if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator) {
+                curPlayer.hit(this);
+                return true;
+            }
+
+
+            return false
+        }
+   ,checkHarmlessCollision :
+        function() {
+            //Out of bounds?
+            if (this.x > Constants.widthPX || this.x < 0 || this.y > Constants.heightPX || this.y < 0) {
+                return true;
+            }
+
+            this.mapX = ~~(this.x / W);
+            this.mapY = ~~(this.y / W);
+
+            //Intersection with wall?
+            if (utils.isWall(map[this.mapX][this.mapY])) {
+                return true;
+            }
+
+            return false;
+        }
+   ,draw :
+        function() {
+            context.fillStyle = this.color;
+            context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
+        }
+   ,destroy :
+        function() {
+            for (x in gameState.bullets) { 
+                if (gameState.bullets[x].id == this.id) { 
+                    gameState.bullets.splice(x, 1);
+                    break;
+                }
+            }
+        }
+};
 /*
  * Monster.
  *
@@ -245,7 +251,7 @@ function Monster(x, y, color) {
         //this.move();
         this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
         this.renderHP();
-        if (Math.random()>.8)
+        if (random()>.8)
             this.fireBullet();
     }
 
@@ -269,7 +275,7 @@ function Monster(x, y, color) {
 
         } else {
             //Choose a random direction to go in.
-            var v = utils.normalizeVect(~~(Math.random()*3)-1, ~~(Math.random()*3)-1);
+            var v = utils.normalizeVect(~~(random()*3)-1, ~~(random()*3)-1);
 
             new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1], this);
         }
@@ -295,8 +301,8 @@ function Monster(x, y, color) {
 
     this.move = function() {
         var dx, dy;
-        dx = ~~(Math.random()*4 - 2)*Constants.tileSize;
-        dy = ~~(Math.random()*4 - 2)*Constants.tileSize;
+        dx = ~~(random()*4 - 2)*Constants.tileSize;
+        dy = ~~(random()*4 - 2)*Constants.tileSize;
 
         this.x += dx;
         this.y += dy;
@@ -404,7 +410,8 @@ function shootBullet() {
 
 function updateLocal() {
     curPlayer.update();
-    shootBullet();
+    if (gameState.mouseDown)
+        shootBullet();
 }
 
 function drawMap() {
@@ -415,7 +422,7 @@ function drawMap() {
             else if (map[i][j] == "#")
                 context.fillStyle = "#333333";
             else
-                context.fillStyle = "#" + ~~(Math.random() * 999999);
+                context.fillStyle = "#" + ~~(random() * 999999);
             context.fillRect(i*W,j*W,W,W);
         }
     }
@@ -432,7 +439,7 @@ function drawMap() {
  *
  */
 function getUniqueID() {
-    return ~~(Math.random()*1e20); //Mathematically sound
+    return ~~(random()*1e20); //Mathematically sound
 }
 
 /*
@@ -495,18 +502,14 @@ $(function() {
     $(document).keydown(function(e) { 
         console.log(e.which);
         gameState.keys[e.which] = true;
-    });
-
-    $(document).keyup(function(e) { 
+    }).keyup(function(e) { 
         gameState.keys[e.which] = false;
-    });
-
-    $(document).mousemove(function(e) {
+    }).mousemove(function(e) {
         gameState.mouseX = e.clientX;
         gameState.mouseY = e.clientY;
-    });
-
-    $(document).mousedown(function(e) {
+    }).mousedown(function(e) {
+        gameState.mouseDown = true;
+    }).mouseup(function(e) {
         gameState.mouseDown = false;
     });
     
