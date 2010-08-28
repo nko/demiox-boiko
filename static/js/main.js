@@ -3,7 +3,6 @@ var canv, context;
 var W     = 10; //Width of tiles
 var walls = "#"; //Can't walk on these
 
-var state = {};
 
 // This is actually faster.
 var sqrt = Math.sqrt,
@@ -100,6 +99,7 @@ function dungen(width, height, minSize, maxSize, numRooms) {
  * Static objects
  */
 var Constants = {
+    port : 80,
     tileSize : W,
     tilesAcross : 25,
     tilesUp : 25,
@@ -116,6 +116,8 @@ var gameState = {
     bullets : [],
     monsters : [],
     socket : undefined,
+    newState : {},  //This is what we send to the server every loop
+    players : [],
 };
 
 /*
@@ -140,8 +142,26 @@ var utils = {
             if (hyp === 0)
                 return [0, 0];
             return [x/hyp, y/hyp];
-        }
+        },
+    send :
+        function (msg) { 
+            gameState.socket.send(msg);     
+        },
+    /*
+     * Finds an object with specified ID in list list. Returns false if
+     * no such object exists.
+     */
+    findObjectWithID : 
+        function (list, ID){
+            for (var i=0;i<list.length;i++){
+                if (list[i].ID == ID){
+                    return list[i];
+                }
+            }
+            return false;
+        },
 };
+
 
 /*
  * Dynamic objects
@@ -160,6 +180,31 @@ function Point(x, y) {
 }
 
 /*
+ *
+ * Player
+ *
+ * Distinguished from curPlayer; these are non playable characters, controlled by other people.
+ */
+
+function Player(x, y, ID, color){
+    this.x=x;
+    this.y=y;
+    this.ID=ID;
+    this.color=color;
+}
+Player.prototype = {
+    move : function(x, y){
+        this.x=x;
+        this.y=y;
+    },
+    draw : function() { 
+        context.fillStyle = this.color;
+        context.fillRect(this.x*W, this.y*W, W, W);
+    },
+};
+
+
+/*
  * Bullet
  *
  * Initialize with x and y and optional dx, dy, speed.
@@ -175,7 +220,7 @@ function Bullet(x, y, color, speed, creator, dx, dy) {
     this.point = new Point(x,y);
     this.color = color;
     this.creator = creator;
-    this.id = getUniqueID();
+    this.ID = getUniqueID();
     this.init = function() {
         if (dx != undefined) {
             this.dx=dx;
@@ -274,7 +319,7 @@ Bullet.prototype = {
     destroy :
         function() {
             for (x in gameState.bullets) { 
-                if (gameState.bullets[x].id == this.id) { 
+                if (gameState.bullets[x].ID == this.ID) { 
                     gameState.bullets.splice(x, 1);
                     break;
                 }
@@ -292,7 +337,7 @@ function Monster(x, y, color) {
     this.x = x*Constants.tileSize;
     this.y = y*Constants.tileSize;
     this.color = color;
-    this.id = getUniqueID();
+    this.ID = getUniqueID();
     this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
     this.init();
 }
@@ -347,7 +392,7 @@ Monster.prototype = {
     destroy :
         function() {
             for (x in gameState.monsters) { 
-                if (gameState.monsters[x].id == this.id) { 
+                if (gameState.monsters[x].ID == this.ID) { 
                     gameState.monsters.splice(x, 1)
                     break;
                 }
@@ -396,6 +441,7 @@ Monster.prototype = {
  */
 var curPlayer = {
     x : 10,
+    ID : getUniqueID(),
     y : 10,
     HP : 10,
     maxHP : 10,
@@ -409,7 +455,10 @@ var curPlayer = {
         if (!this.checkCollisions(dx, dy)) {
             this.x += dx;
             this.y += dy;
+            gameState.newState.x = curPlayer.x;
+            gameState.newState.y = curPlayer.y;
         }
+
         this.rect = new Rect(this.x*W, this.y*W, this.x*W + W, this.y*W + W);
     },
     draw : function() { 
@@ -438,10 +487,14 @@ function draw() {
     drawMap();
     drawBullets();
     drawMonsters();
+
     curPlayer.draw();
-    /*
     drawOtherCharacters();
-    */
+}
+function drawOtherCharacters(){
+    for (c in gameState.players) {
+        gameState.players[c].draw();
+    }
 }
 
 function drawBullets() {
@@ -515,6 +568,22 @@ function getUpdatesFromServer() {
     }
 }
 
+function serverUpdate(json){
+    var update = JSON.parse(json);
+    if (update.ID != curPlayer.ID){
+        var obj = utils.findObjectWithID(gameState.players, update.ID);
+        if (!obj){
+            //Not found, so add him. New player! TODO more fanfare
+            gameState.players.push(new Player(update.x, update.y, update.ID, "#ff5555"));
+        } else {
+            obj.x = update.x;
+            obj.y = update.y;
+        }
+        
+    }
+    //console.log(obj);
+}
+
 /* 
  * Send information to the server like so.
  *
@@ -525,11 +594,12 @@ function getUpdatesFromServer() {
  *  dropped   :    "        "
  */ 
 function sendUpdatesToServer() {
-
+    utils.send(JSON.stringify(gameState.newState));
 }
 /* Handle all game actions. This is called several times a second */
 function gameLoop() {
-    state = {};
+    gameState.newState = {};
+    gameState.newState.ID = curPlayer.ID;
     getUpdatesFromServer();
     updateLocal();
     draw();
@@ -539,15 +609,13 @@ function gameLoop() {
 function initialize() {
     io.setPath('/client/');
     gameState.socket = new io.Socket(null, { 
-        port: 80,
+        port: Constants.port,
         transports: ['websocket', 'htmlfile', 'xhr-multipart', 'xhr-polling']
     });
     gameState.socket.connect();
     
-    gameState.socket.on('message', function(data) {
-        $('#reciever').append('<li>' + data + '</li>');
-    });
-    
+    gameState.socket.on('message', serverUpdate);
+
     var m = new Monster(5, 5, "ff5555");
     for (var i=0;i<255;i++) {
         gameState.keys[i]=false;
@@ -570,7 +638,6 @@ $(function() {
         gameState.mouseX = e.clientX;
         gameState.mouseY = e.clientY;
     }).mousedown(function(e) {
-        gameState.socket.send("Fire bullet!");     
         gameState.mouseDown = true;
     }).mouseup(function(e) {
         gameState.mouseDown = false;
