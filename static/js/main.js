@@ -123,7 +123,7 @@ var gameState = {
     socket : undefined,
     newState : {},  //This is what we send to the server every loop
     bullets : [],
-    monsters : [],
+//    monsters : [],
     players : [],
 };
 
@@ -207,6 +207,7 @@ function Point(x, y) {
  *
  * TODO monster update code should be on server, not client!
  */
+/*
 function Monster(x, y, color) {
     this.x = x*Constants.tileSize;
     this.y = y*Constants.tileSize;
@@ -314,7 +315,7 @@ Monster.prototype = {
             //TODO check collision against all players, also.
         }
 };
-
+*/
 /*
  * Current character 
  */
@@ -347,7 +348,7 @@ var curPlayer = {
             //<span id="txtlabel">What's your name?</span><input type="text" id="inputtext" /> Enter to send.
             if (this.name == ""){
                 this.name = $("#inputtext").val();
-                $("#txtlabel").html("Now, spam the other players! :");
+                $("label").text("Now, spam the other players! :");
                 curPlayer.name = this.name;
             } else {
                 this.message = ($("#inputtext").val() == "" ? this.message : $("#inputtext").val());
@@ -355,7 +356,7 @@ var curPlayer = {
             $("#inputtext").val("");
         }
 
-        console.log(curPlayer.message);
+        //console.log(curPlayer.message);
         gameState.newState[curPlayer.ID].name = curPlayer.name;
         gameState.newState[curPlayer.ID].message = curPlayer.message;
 
@@ -391,7 +392,7 @@ var curPlayer = {
 function draw() {
     drawMap();
     drawBullets();
-    drawMonsters();
+//    drawMonsters();
 
     curPlayer.draw();
     drawOtherCharacters();
@@ -580,7 +581,7 @@ function sendUpdatesToServer() {
 function gameLoop() {
     gameState.newState = { };
     gameState.newState[curPlayer.ID] ;
-    getUpdatesFromServer();
+    //getUpdatesFromServer();
     updateLocal();
     draw();
 }
@@ -608,18 +609,40 @@ $(function() {
     /*
      * Handlers
      */
-    $(document).keydown(function(e) { 
-        console.log(e.which);
-        gameState.keys[e.which] = true;
+    var takefocus = false;
+    $(document).keydown(function(e) {
+        if (takefocus){
+            //console.log(e.which);
+            gameState.keys[e.which] = true;
+        }
     }).keyup(function(e) { 
+        if (takefocus){
+            
+        }
         gameState.keys[e.which] = false;
-    }).mousemove(function(e) {
-        gameState.mouseX = e.clientX;
-        gameState.mouseY = e.clientY;
-    }).mousedown(function(e) {
-        gameState.mouseDown = true;
-    }).mouseup(function(e) {
+    });
+    $("canvas").mouseover(function(e) {
+        takefocus = true;
+    }).mouseout(function(e) {
         gameState.mouseDown = false;
+        for (var i=0;i<255;i++) {
+            gameState.keys[i] = false;
+        }
+        takefocus = false;
+    }).mousemove(function(e) {
+        if (takefocus){
+            var o = $(this).offset();
+            gameState.mouseX = e.clientX - o.left;
+            gameState.mouseY = e.clientY - o.top;
+        }
+    }).mousedown(function(e) {
+        if (takefocus){
+            gameState.mouseDown = true;
+        }
+    }).mouseup(function(e) {
+        if (takefocus){
+            gameState.mouseDown = false;
+        }
     });
     
     window.onbeforeunload = function(){

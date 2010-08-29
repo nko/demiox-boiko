@@ -10,7 +10,7 @@
      * Distinguished from curPlayer; these are non playable characters, controlled by other people.
      */
 
-    exports.Player = function(x, y, ID, color, HP, isClient){
+    var Player = function(x, y, ID, color, HP, isClient){
         this.x=x;
         this.y=y;
         this.HP=HP;
@@ -21,16 +21,16 @@
 
         this.rect = Constants.Rect(this.x*10, this.y*10, this.x*10+10, this.y*10+10);
 
-        if (typeof exports.Player.all == 'undefined') { //Static variable hack
-            exports.Player.all = [];
+        if (typeof Player.all == 'undefined') { //Static variable hack
+            Player.all = [];
         }
 
         if (!isClient) { 
-            exports.Player.all.push(this);
+            Player.all.push(this);
         }
     }
 
-    exports.Player.prototype = {
+    Player.prototype = {
         move : function(x, y){
             this.x=x;
             this.y=y;
@@ -45,16 +45,16 @@
         },
         destroy :
             function() {
-                for (x in exports.Player.all) { 
-                    if (exports.Player.all[x].ID == this.ID) { 
-                        exports.Player.all.splice(x, 1);
+                for (x in Player.all) { 
+                    if (Player.all[x].ID == this.ID) { 
+                        Player.all.splice(x, 1);
                         break;
                     }
                 }
             }
     };
-
-
+    
+    exports.Player = Player;
 
 
 })(typeof exports === 'undefined'? this: exports, typeof exports === 'undefined');

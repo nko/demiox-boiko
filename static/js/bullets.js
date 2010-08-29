@@ -24,7 +24,7 @@
 
     }
 
-    exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy, map, isClient) {
+    var Bullet = function(x, y, color, speed, ID, creator, dx, dy, map, isClient) {
         //this.Constants = Constants;
         this.x = x;
         this.y = y;
@@ -34,30 +34,27 @@
         this.ID = ID;
 
         this.speed=speed;
-        this.init = function() {
-            if (dx != undefined) {
-                this.dx=dx;
-                this.dy=dy;
-            } else {
-                var dxfar = gameState.mouseX - this.x;
-                var dyfar = gameState.mouseY - this.y;
-                var hyp = sqrt(dxfar * dxfar + dyfar * dyfar);
-                if (hyp !== 0) {
-                    this.dx = (dxfar / hyp)*speed;
-                    this.dy = (dyfar / hyp)*speed;
-                }
+        if (dx != undefined) {
+            this.dx=dx;
+            this.dy=dy;
+        } else {
+            var dxfar = gameState.mouseX - this.x;
+            var dyfar = gameState.mouseY - this.y;
+            var hyp = sqrt(dxfar * dxfar + dyfar * dyfar);
+            if (hyp !== 0) {
+                this.dx = (dxfar / hyp)*speed;
+                this.dy = (dyfar / hyp)*speed;
             }
-            if (typeof exports.Bullet.all == 'undefined') { //Static variable hack
-                exports.Bullet.all = [];
-            }
-            if (!isClient) { 
-                exports.Bullet.all.push(this);
-            }
-            //gameState.bullets.push(this);
         }
-        this.init();
+        if (typeof Bullet.all == 'undefined') { //Static variable hack
+            Bullet.all = [];
+        }
+        if (!isClient) { 
+            Bullet.all.push(this);
+        }
+        //gameState.bullets.push(this);
     }
-    exports.Bullet.prototype = {
+    Bullet.prototype = {
         DMG : 1,
         W : 4,
         update :
@@ -134,13 +131,13 @@
             },
         destroy :
             function() {
-                for (x in exports.Bullet.all) { 
-                    if (exports.Bullet.all[x].ID == this.ID) { 
-                        exports.Bullet.all.splice(x, 1);
+                for (x in Bullet.all) { 
+                    if (Bullet.all[x].ID == this.ID) { 
+                        Bullet.all.splice(x, 1);
                         break;
                     }
                 }
             }
     };
-
+    exports.Bullet = Bullet;
 })(typeof exports === 'undefined'? this: exports, typeof exports === 'undefined');
