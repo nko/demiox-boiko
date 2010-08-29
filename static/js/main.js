@@ -12,106 +12,6 @@ var sqrt = Math.sqrt,
     max = Math.max,
     abs = Math.abs,
     random = Math.random;
-
-//Constants = exports.Constants;
-/* {
-    port : 80,
-    tileSize : W,
-    tilesAcross : 90,
-    tilesUp : 75,
-    widthPX : 90 * W,
-    heightPX : 75 * W,
-    refreshRate : 45,
-    distanceFrom00 : 5, //TODO make general
-};*/
-
-//Bullet = exports.Bullet;
-
-//var map = dungen(25, 25, 3, 6, 10);
-/*
-var map = [ ".........................",
-            ".........................",
-            ".......#####.............",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            "..........#..............",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            ".........................",
-            "................#........",
-            ".........................", ];
-*/
-var map = dungen(90, 75, 10, 16, 40);
-
-/*
- * Random dungeon generator.
- * Transfer to server-side eventually.
- * (width, height) = size of dungeon.
- * (minSize, maxSize) = room sizes.
- */
-function dungen(width, height, minSize, maxSize, numRooms) {
-    // initialize map
-    var map = [], room;
-    for (var x=0; x<width; x++) {
-        var a = [];
-        for (var y=0; y<height; y++) {
-            a.push('#');
-        }
-        map.push(a);
-    }
-    // generate rooms
-    var rooms = [];
-    for (var i=0; i<numRooms; i++) {
-        var w = floor(random()*(maxSize-minSize+1)) + minSize;
-        var h = floor(random()*(maxSize-minSize+1)) + minSize;
-        var x = floor(random()*(width - w));
-        var y = floor(random()*(height - h));
-        rooms.push({ x: x, y: y, w: w, h: h});
-    }
-    // slap rooms onto map like a can of paint
-    for (var i=0; i<numRooms; i++) {
-        var r = rooms[i];
-        for (var y=r.y; y<r.y+r.h; y++) {
-            for (var x=r.x; x<r.x+r.w; x++) {
-                map[y][x] = '.';
-            }
-        }
-    }
-    // connect rooms with hallways
-    var room = rooms.pop();
-    while (rooms.length) {
-        var r = rooms.pop(), x=r.x, y=r.y;
-        while (x != room.x) {
-            x += (room.x - x > 0) ? 1 : -1;
-            map[y][x] = '.';
-        }
-        while (y != room.y) {
-            y += (room.y - y > 0) ? 1 : -1;
-            map[y][x] = '.';
-        }
-    }
-    return map;
-}
-
 /*
  * Static objects
  */
@@ -200,122 +100,7 @@ function Point(x, y) {
     this.x=x;
     this.y=y;
 }
-/*
- * Monster.
- *
- * Initializes with an x and y position.
- *
- * TODO monster update code should be on server, not client!
- */
-/*
-function Monster(x, y, color) {
-    this.x = x*Constants.tileSize;
-    this.y = y*Constants.tileSize;
-    this.color = color;
-    this.ID = getUniqueID();
-    this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
-    gameState.monsters.push(this);
-}
 
-Monster.prototype = {
-    W : 8,
-    HP : 25,
-    maxHP : 25,
-    aggroDist : 50,
-    update :
-        function() {
-            this.move();
-            this.rect = new Rect(this.x, this.y, this.x + this.W, this.y + this.W);
-            this.renderHP();
-            if (random()>.8)
-                this.fireBullet();
-        },
-    renderHP :
-        function() {
-            context.fillText(this.HP + " HP", this.x, this.y-5);
-        },
-    draw :
-        function() {
-            context.fillStyle = this.color;
-            context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
-            this.renderHP();
-        },
-    //TODO this should go onto the server :]
-    fireBullet :
-        function(seeking) {
-            //If seeking - fire in the direction of a player.
-            //
-            //Otherwise, fire in a random direction.
-
-            if (seeking) {
-
-            } else {
-                //Choose a random direction to go in.
-                var v = utils.normalizeVect(floor(random()*3)-1, floor(random()*3)-1);
-
-                //new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1], this);
-            }
-
-        },
-    hit :
-        function(bullet) {
-            this.HP -= bullet.DMG;
-
-            if (this.HP <= 0) {
-                this.destroy();
-            }
-        },
-    destroy :
-        function() {
-            for (x in gameState.monsters) { 
-                if (gameState.monsters[x].ID == this.ID) { 
-                    gameState.monsters.splice(x, 1)
-                    break;
-                }
-            }
-        },
-    move :
-        function() {
-            // TODO check all players to find closest player.
-            var dx = curPlayer.x - this.x;
-            var dy = curPlayer.y - this.y;
-            if (abs(dx) + abs(dy) < this.aggroDist) {
-                var v = utils.normalizeVect(dx, dy);
-                dx = v[0];
-                dy = v[1];
-            } else {
-                dx = floor(random()*4 - 2);
-                dy = floor(random()*4 - 2);
-            }
-            
-            this.x += dx;
-            this.y += dy;
-            if (this.checkCollision()) {
-                this.x -= dx;
-                this.y -= dy;
-            }
-        },
-    checkCollision :
-        function() {
-            if (utils.isWall(map[floor(this.x/W)][floor(this.y/W)])) {
-                return true;
-            }
-
-            //TODO remove this once on server
-            if (this.x == curPlayer.x && this.y == curPlayer.y) {
-                return true;
-            }
-
-            if (this.x < 0 || this.y < 0 || this.x > Constants.widthPX || this.y > Constants.heightPX) {
-                return true;
-            }
-
-            return false;
-
-            //TODO check collision against all players, also.
-        }
-};
-*/
 /*
  * Current character 
  */
@@ -375,6 +160,10 @@ var curPlayer = {
         //TODO prompt player to restart
     },
     checkCollisions : function(dx, dy) {
+        var x = this.x + dx;
+        var y = this.y + dy;
+        if (x < 0 || y < 0 || x >= this.map.length || y >= this.map[0].length)
+            return true;
         return utils.isWall(map[this.x + dx][this.y + dy]);
     },
 }
