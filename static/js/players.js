@@ -14,6 +14,7 @@
         this.x=x;
         this.y=y;
         this.HP=HP;
+        this.maxHP=10;
         this.ID=ID;
         this.name="";
         this.message="";

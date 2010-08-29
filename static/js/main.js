@@ -355,7 +355,6 @@ var curPlayer = {
             $("#inputtext").val("");
         }
 
-        console.log(curPlayer.message);
         gameState.newState[curPlayer.ID].name = curPlayer.name;
         gameState.newState[curPlayer.ID].message = curPlayer.message;
 
@@ -444,7 +443,6 @@ function shootBullet() {
 }
 
 function updateLocal() {
-    curPlayer.update();
     if (gameState.mouseDown)
         shootBullet();
 }
@@ -578,8 +576,23 @@ function sendUpdatesToServer() {
 }
 /* Handle all game actions. This is called several times a second */
 function gameLoop() {
+    console.log(curPlayer.HP);
     gameState.newState = { };
-    gameState.newState[curPlayer.ID] ;
+    curPlayer.update();
+
+    if (curPlayer.HP <= 0) {
+        console.log("Yup!");
+        gameState.newState[curPlayer.ID].type = "playerdie";
+        utils.send(JSON.stringify(gameState.newState));
+
+
+        curPlayer.HP = curPlayer.maxHP;
+        do {  
+            curPlayer.x = Math.floor ( Math.random() * 50); 
+            curPlayer.y = Math.floor ( Math.random() * 50); 
+        } while (map[curPlayer.x][curPlayer.y] == "#");
+    }
+    //gameState.newState[curPlayer.ID] ;
     getUpdatesFromServer();
     updateLocal();
     draw();
