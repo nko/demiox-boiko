@@ -110,6 +110,8 @@ var curPlayer = {
     y : 10,
     HP : 10,
     maxHP : 10,
+    kills : 0,
+    deaths : 0,
     name : "",
     message : "",
     hit : function(bullet) {
@@ -140,6 +142,8 @@ var curPlayer = {
             }
             $("#inputtext").val("");
         }
+        $("#kills").html(this.kills);
+        $("#deaths").html(this.deaths);
 
         gameState.newState[curPlayer.ID].name = curPlayer.name;
         gameState.newState[curPlayer.ID].message = curPlayer.message;
@@ -326,6 +330,8 @@ function serverUpdate(json){
             if (ID == curPlayer.ID) {
                 //Update HP
                 curPlayer.HP = updatedObject.HP;
+                curPlayer.deaths = updatedObject.deaths;
+                curPlayer.kills = updatedObject.kills;
             } else { 
                 //Update position
 
