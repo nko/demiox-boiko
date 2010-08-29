@@ -333,7 +333,17 @@ setInterval(function(){
                     obj.name    = curUpdate.name;
                     obj.message = curUpdate.message;
                 }
-            }
+            } else if (curUpdate.type == "playerleave") { 
+                    console.log("Playerleave.");
+                    //utils.send(JSON.stringify({type:"playerleave", ID:curPlayer.ID}));
+                    var obj = Constants.utils.findObjectWithID( Player.all || [], ID);
+                    if (obj) //Just in case
+                        obj.destroy();
+             } else if (curUpdate.type == "playerdie"){
+                    var obj = Constants.utils.findObjectWithID( Player.all || [], ID);
+
+                    obj.HP = obj.maxHP;
+             }
         }
     }
     updates = {}; //Clear updates for the new updates to come in.
