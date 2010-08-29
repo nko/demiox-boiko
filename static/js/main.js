@@ -348,18 +348,15 @@ function serverUpdate(json){
             }
         }
     }
-    /*
-    if (update.ID != curPlayer.ID){
-        var obj = utils.findObjectWithID(gameState.players, update.ID);
-        if (!obj){
-            //Not found, so add him. New player! TODO more fanfare
-            gameState.players.push(new Player(update.x, update.y, update.ID, "#ff5555"));
-        } else {
-            obj.x = update.x;
-            obj.y = update.y;
+
+    //Update leaderboard
+
+    for (var i=0;i<5;i++){
+        if ( ("leader"+i) in update){
+            $("#leader"+i).html( "<strong>"+update["leader"+i].name+":</strong> " + update["leader"+i].kills ) ;
         }
-        
-    } */
+    }
+
 
     sendUpdatesToServer();
 }

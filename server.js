@@ -257,6 +257,21 @@ function generateUpdateMessage(){
         update[cPlay.ID].message = cPlay.message;
     }
 
+    /*
+     * and leaderboard
+     */
+    var leader = [];
+    for (var p in Player.all){
+        leader.push( { name : Player.all[p].name, kills : Player.all[p].kills } );
+    }
+    leader.sort( function(a,b){ return b.kills - a.kills; });
+
+    for (var l in leader){
+        update["leader"+l] = {};
+        update["leader"+l].name = leader[l].name;
+        update["leader"+l].kills = leader[l].kills;
+    }
+
     return update;
 }
 

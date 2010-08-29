@@ -41,10 +41,9 @@
             var dxfar = gameState.mouseX - this.x;
             var dyfar = gameState.mouseY - this.y;
             var hyp = sqrt(dxfar * dxfar + dyfar * dyfar);
-            if (hyp !== 0) {
-                this.dx = (dxfar / hyp);
-                this.dy = (dyfar / hyp);
-            }
+            if (hyp==0) hyp = .1
+            this.dx = (dxfar / hyp);
+            this.dy = (dyfar / hyp);
         }
         if (typeof Bullet.all == 'undefined') { //Static variable hack
             Bullet.all = [];
@@ -68,7 +67,7 @@
                 //Don't just check at the new position - check everywhere along that line, in increments of 1
                 var startX = this.x;
                 var startY = this.y;
-                var big = Math.abs(Math.max(this.dx *this.speed, this.dy *this.speed));
+                var big = Math.max(Math.abs(this.dx *this.speed), Math.abs(this.dy *this.speed));
                 for (var i=0;i<=big;i++) { 
                     this.x = startX + this.dx * (i+1) * this.speed / big;
                     this.y = startY + this.dy * (i+1) * this.speed / big;
