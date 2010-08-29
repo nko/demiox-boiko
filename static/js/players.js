@@ -41,6 +41,15 @@
         hit : function(bullet){
             this.HP -= bullet.DMG;
         },
+        destroy :
+            function() {
+                for (x in exports.Player.all) { 
+                    if (exports.Player.all[x].ID == this.ID) { 
+                        exports.Player.all.splice(x, 1);
+                        break;
+                    }
+                }
+            }
     };
 
 

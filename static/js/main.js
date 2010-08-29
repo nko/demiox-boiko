@@ -413,7 +413,7 @@ function shootBullet() {
 
     var d = utils.normalizeVect(gameState.mouseX - curPlayer.x*W, gameState.mouseY - curPlayer.y*W);
     
-    gameState.newState[ID] = {"ID":ID, "type":"bullet", x:curPlayer.x*W, y:curPlayer.y*W, dx:d[0], dy:d[1] } ;
+    gameState.newState[ID] = {"ID":ID, "creator":curPlayer.ID, "type":"bullet", x:curPlayer.x*W, y:curPlayer.y*W, dx:d[0], dy:d[1] } ;
 }
 
 function updateLocal() {
@@ -477,6 +477,11 @@ function login(json){
     map = json.map;
 
     cacheMap();
+
+    while (map[curPlayer.x][curPlayer.y] == "#"){
+        curPlayer.x = Math.floor ( Math.random() * 50); 
+        curPlayer.y = Math.floor ( Math.random() * 50); 
+    }
 }
 
 function serverUpdate(json){

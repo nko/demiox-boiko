@@ -101,8 +101,7 @@
                 */
 
                 for (p in Player.all) { 
-                    console.log(JSON.stringify(Player.all[p].rect));
-                    if (Constants.utils.pointIntersectRect(this.point, Player.all[p].rect)){ //&& Player.all[p] != this.creator) {
+                    if (Constants.utils.pointIntersectRect(this.point, Player.all[p].rect) && Player.all[p].ID != this.creator) {
                         Player.all[p].hit(this);
                         return true;
                     }

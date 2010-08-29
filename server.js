@@ -282,7 +282,7 @@ sock.on('connection', function(client) {
                 if (curUpdate.type == "bullet") { 
 
                     //exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy) {
-                    var b = new Bullet(curUpdate.x, curUpdate.y, "000000", 16, ID, undefined, curUpdate.dx, curUpdate.dy);
+                    var b = new Bullet(curUpdate.x, curUpdate.y, "000000", 16, ID, curUpdate.creator, curUpdate.dx, curUpdate.dy);
                 } else if (curUpdate.type == "player") { 
                     var obj = Constants.utils.findObjectWithID( Player.all || [], ID);
                     if (!obj) {
