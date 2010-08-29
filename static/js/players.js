@@ -1,7 +1,10 @@
 (function(exports, typeOfInc){
 
-    if (!typeOfInc)
+    if (!typeOfInc) {
         this.Constants = require('./constants').Constants;
+        this.Player = require('./players').Player;
+
+    }
 
     /*
      *
@@ -10,11 +13,14 @@
      * Distinguished from curPlayer; these are non playable characters, controlled by other people.
      */
 
-    var Player = function(x, y, ID, color, HP, isClient){
+    var Player = function(x, y, ID, color, HP, kills, deaths, isClient){
         this.x=x;
         this.y=y;
         this.HP=HP;
         this.maxHP=10;
+        this.kills=kills;
+        this.deaths=deaths;
+
         this.ID=ID;
         this.name="";
         this.message="";
@@ -44,6 +50,14 @@
         },
         hit : function(bullet){
             this.HP -= bullet.DMG;
+
+            if (this.HP == 0) { //TODO change to ==
+                var obj = Constants.utils.findObjectWithID(Player.all, bullet.creator);
+                obj.kills++;
+                this.deaths++;
+                console.log ( "kills", obj.kills);
+                console.log ( "deathd", this.deaths);
+            }
         },
         destroy :
             function() {

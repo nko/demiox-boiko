@@ -252,6 +252,8 @@ function generateUpdateMessage(){
         update[cPlay.ID].HP      = cPlay.HP;
         update[cPlay.ID].type    = "player";
         update[cPlay.ID].name    = cPlay.name;
+        update[cPlay.ID].kills   = cPlay.kills;
+        update[cPlay.ID].deaths  = cPlay.deaths;
         update[cPlay.ID].message = cPlay.message;
     }
 
@@ -328,7 +330,7 @@ setInterval(function(){
                     //New player!
                     //
                     //TODO write something nice out!
-                    var p = new Player(curUpdate.x, curUpdate.y, ID, "ff5555", 10);
+                    var p = new Player(curUpdate.x, curUpdate.y, ID, "ff5555", 10, 0, 0);
                     p.lastUpdate = ticks;
                 } else {
                     obj.move(curUpdate.x, curUpdate.y);
