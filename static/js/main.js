@@ -132,15 +132,24 @@ var curPlayer = {
         }
 
         if (gameState.keys[13]){//send message
-            //<span id="txtlabel">What's your name?</span><input type="text" id="inputtext" /> Enter to send.
-            if (this.name == ""){
-                this.name = $("#inputtext").val();
-                $("#txtlabel").html("Now, spam the other players! :");
-                curPlayer.name = this.name;
-            } else {
-                this.message = ($("#inputtext").val() == "" ? this.message : $("#inputtext").val());
+            console.log("fire");
+            gameState.keys[13]=false;
+            var cfocused = $("*:focus").attr("id");
+            if (cfocused != "inputtext"){
+                $("#inputtext").focus();
+            } else { 
+                //<span id="txtlabel">What's your name?</span><input type="text" id="inputtext" /> Enter to send.
+                if (this.name == ""){
+                    this.name = $("#inputtext").val();
+                    $("#txtlabel").html("Now, spam the other players! :");
+                    curPlayer.name = this.name;
+                } else {
+                    this.message = ($("#inputtext").val() == "" ? this.message : $("#inputtext").val());
+                }
+                $("#inputtext").val("");
+                $("input#inputtext").blur()
+                //$("#nofocus").focus();
             }
-            $("#inputtext").val("");
         }
         $("#kills").html(this.kills);
         $("#deaths").html(this.deaths);
@@ -387,6 +396,7 @@ function gameLoop() {
 }
 
 function initialize() {
+    //$("#nofocus").hide();
     io.setPath('/client/');
     gameState.socket = new io.Socket(null, { 
         port: Constants.port,
@@ -411,13 +421,13 @@ $(function() {
     
      var takefocus = false;
      $(document).keydown(function(e) {
-         if (takefocus){	 	
+         //if (takefocus){	 	
               gameState.keys[e.which] = true;
-         }
+         //}
      }).keyup(function(e) { 
-         if (takefocus){
+         //if (takefocus){
              gameState.keys[e.which] = false;
-         }
+        // }
      });
      $("canvas").mouseover(function(e) {
          takefocus = true;
