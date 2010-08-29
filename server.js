@@ -303,7 +303,8 @@ sock.on('connection', function(client) {
                     console.log("Playerleave.");
                     //utils.send(JSON.stringify({type:"playerleave", ID:curPlayer.ID}));
                     var obj = Constants.utils.findObjectWithID( Player.all || [], ID);
-                    obj.destroy();
+                    if (obj != false)
+                        obj.destroy();
                 }
             }
         }
