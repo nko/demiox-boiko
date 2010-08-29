@@ -13,7 +13,38 @@ var sqrt = Math.sqrt,
     abs = Math.abs,
     random = Math.random;
 
-var map = dungen(90, 75, 10, 16, 40);
+//var map = dungen(25, 25, 3, 6, 10);
+var map = [ ".........................",
+            ".........................",
+            ".......#####.............",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            "..........#..............",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            ".........................",
+            "................#........",
+            ".........................", ];
+//var map = dungen(90, 75, 10, 16, 40);
 
 /*
  * Random dungeon generator.
@@ -130,6 +161,21 @@ var utils = {
             }
             return false;
         },
+    isNumeric:
+       function (sText) {
+           var ValidChars = "0123456789.";
+           var IsNumber=true;
+           var Char;
+         
+           for (i = 0; i < sText.length && IsNumber == true; i++) { 
+              Char = sText.charAt(i); 
+              if (ValidChars.indexOf(Char) == -1){
+                     IsNumber = false;
+                 }
+              }
+           return IsNumber;
+       }, 
+
 };
 
 
@@ -241,7 +287,6 @@ Bullet.prototype = {
 
                 //TODO and when i do this, remove this entirely.
                 if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator) {
-                    console.log("Ouch.");
                     return true;
                 }
             }
@@ -422,7 +467,6 @@ var curPlayer = {
     maxHP : 10,
     hit : function(bullet) {
         this.HP -= bullet.DMG;
-        console.log(this.HP);
     },
     update : function() {
         var dx = (gameState.keys[68]||gameState.keys[39]) - (gameState.keys[65]||gameState.keys[37]);
@@ -430,8 +474,9 @@ var curPlayer = {
         if (!this.checkCollisions(dx, dy)) {
             this.x += dx;
             this.y += dy;
-            gameState.newState.x = curPlayer.x;
-            gameState.newState.y = curPlayer.y;
+            gameState.newState[curPlayer.ID] = {};
+            gameState.newState[curPlayer.ID].x = curPlayer.x
+            gameState.newState[curPlayer.ID].y = curPlayer.y
         }
 
         this.rect = new Rect(this.x*W, this.y*W, this.x*W + W, this.y*W + W);
@@ -504,12 +549,17 @@ function drawMonsters() {
 }
 
 function shootBullet() {
-    var b = new Bullet(curPlayer.x*W + W/2, curPlayer.y*W + W/2, "#000000", 12, curPlayer); //TODO curplayer->ID
+    var ID = getUniqueID();
+
+    var d = utils.normalizeVect(gameState.mouseX - curPlayer.x*W, gameState.mouseY - curPlayer.y*W);
+    
+    gameState.newState[ID] = {"ID":ID, "type":"newBullet", x:curPlayer.x*W, y:curPlayer.y*W, dx:d[0], dy:d[1] } ;
 }
 
 function updateLocal() {
     curPlayer.update();
-    shootBullet();
+    if (gameState.mouseDown)
+        shootBullet();
 }
 
 function cacheMap() {
@@ -563,7 +613,7 @@ function getUniqueID() {
  */
 function getUpdatesFromServer() {
     for (b in gameState.bullets) {
-        gameState.bullets[b].update();
+        gameState.bullets[b].update(); 
     }
     for (m in gameState.monsters) {
         gameState.monsters[m].update();
@@ -572,6 +622,26 @@ function getUpdatesFromServer() {
 
 function serverUpdate(json){
     var update = JSON.parse(json);
+
+    //Update all modified objects
+    for (ID in update){
+        if (!utils.isNumeric(ID)) continue;
+
+        var updatedObject = update[ID];
+        if (updatedObject.type == "bullet"){
+            //Eventually we will just destroy and create, no need for updating
+            var obj = utils.findObjectWithID(gameState.bullets, ID);
+            if (!obj){
+                var b = new Bullet(updatedObject.x, updatedObject.y, "000000", 8, undefined, 0, 0);
+                b.ID = ID;
+                gameState.bullets.push(b);
+            } else {
+                obj.x = updatedObject.x;
+                obj.y = updatedObject.y;
+            }
+        }
+    }
+    /*
     if (update.ID != curPlayer.ID){
         var obj = utils.findObjectWithID(gameState.players, update.ID);
         if (!obj){
@@ -582,7 +652,9 @@ function serverUpdate(json){
             obj.y = update.y;
         }
         
-    }
+    } */
+
+    sendUpdatesToServer();
     //console.log(obj);
 }
 
@@ -600,12 +672,11 @@ function sendUpdatesToServer() {
 }
 /* Handle all game actions. This is called several times a second */
 function gameLoop() {
-    gameState.newState = {};
-    gameState.newState.ID = curPlayer.ID;
+    gameState.newState = { };
+    gameState.newState[curPlayer.ID] ;
     getUpdatesFromServer();
     updateLocal();
     draw();
-    sendUpdatesToServer();
 }
 
 function initialize() {
