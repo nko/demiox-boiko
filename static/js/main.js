@@ -253,7 +253,7 @@ function Bullet(x, y, color, speed, creator, dx, dy) {
                 this.dy = (dyfar / hyp)*speed;
             }
         }
-        gameState.bullets.push(this);
+        //gameState.bullets.push(this);
     }
     this.init();
 }
@@ -609,6 +609,7 @@ function getUpdatesFromServer() {
 
 function serverUpdate(json){
     var update = JSON.parse(json);
+    gameState.bullets = [];
 
     //Update all modified objects
     for (ID in update){
@@ -618,14 +619,14 @@ function serverUpdate(json){
         if (updatedObject.type == "bullet"){
             //Eventually we will just destroy and create, no need for updating
             var obj = utils.findObjectWithID(gameState.bullets, ID);
-            if (!obj){
+            //if (!obj){
                 var b = new Bullet(updatedObject.x, updatedObject.y, "000000", 8, undefined, 0, 0);
                 b.ID = ID;
                 gameState.bullets.push(b);
-            } else {
+            /*} else {
                 obj.x = updatedObject.x;
                 obj.y = updatedObject.y;
-            }
+            }*/
         }
     }
     /*
