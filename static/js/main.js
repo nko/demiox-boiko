@@ -406,12 +406,12 @@ function askName() {
     $("#naming").keydown(function(e) {
         if (e.which == 13) {
             curPlayer.name = $("#entername input").val();
-            $(this).html("");
+            $("input#playername").blur();
             $("#game").show();
             initialize();
         }
     });
-    $("input#entername").focus();
+    $("input#playername").focus();
 }
 
 $(function() {
