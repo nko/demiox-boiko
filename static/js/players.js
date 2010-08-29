@@ -55,8 +55,8 @@
                 var obj = Constants.utils.findObjectWithID(Player.all, bullet.creator);
                 obj.kills++;
                 this.deaths++;
-                console.log ( "kills", obj.kills);
-                console.log ( "deathd", this.deaths);
+                //console.log ( "kills", obj.kills);
+                //console.log ( "deathd", this.deaths);
             }
         },
         destroy :

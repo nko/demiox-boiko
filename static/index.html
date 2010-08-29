@@ -20,20 +20,27 @@
 			float: left;
 		}
 		label {
-			font: 14px/24px "Helvetica Neue", sans-serif;
-			color: #888;
+			font: 14px/28px "Helvetica Neue", sans-serif;
+			color: #444;
 			text-transform: uppercase;
 			letter-spacing: 0px;
 			display: block;
 			float: left;
 			padding-right: 6px;
-			text-shadow: 1px 2px 0 #000;
+			text-shadow: 1px 1px 1px #fff;
+			position: absolute;
+			left: 5px;
 		}
 		input {
-			width: 600px;
-			height: 20px;
+			height: 24px;
 			font: 20px "Helvetica Neue", sans-serif;
-			border: 1px solid #ccc;
+			border: none;
+			display: block;
+			width: 710px;
+			padding-left: 50px;
+			background: #ccc;
+			color: #111;
+			text-shadow: 1px 1px 1px #666;
 		}
 		h1 {
 			font: 64px "Helvetica Neue", sans-serif;
@@ -46,11 +53,11 @@
 			color: #A45242;
 		}
 		#wrapper {
-			width: 900px;
+			width: 992px;
 			margin: 0 auto;
 			position: relative;
 		}
-		#instructions, #stats, #warning {
+		#instructions, #stats, #warning, #leaderboard {
 			background: #191919;
 			-moz-border-radius: 10px;
 			-webkit-border-radius: 10px;
@@ -62,23 +69,44 @@
 			padding-left: 10px;
 			text-shadow: 1px 2px 0 #000;
 		}
-		#instructions strong, #stats strong, #warning strong {
-			color: #ccc;
+		#instructions strong, #stats strong, #warning strong, #leaderboard strong {
+			color: #ddd;
 		}
 		#instructions {
 			position: absolute;
 			top: 8px;
-			left: 260px;
+			right: 440px;
 		}
 		#stats {
 			position: absolute;
 			top: 8px;
-			left: 480px;
+			right: 220px;
 		}
 		#warning {
 			position: absolute;
 			top: 8px;
-			left: 700px;
+			right: 0;
+		}
+		#chat {
+			position: relative;
+		}
+		#leaderboard {
+			position: absolute;
+			top: 80px;
+			right: 0;
+			height: 600px;
+		}
+		#leaderboard p {
+			text-transform: uppercase;
+			color: #ccc;
+			font-weight: bold;
+			border-bottom: 1px solid #444;
+			margin-right: 1em;
+			padding-bottom: 2px;
+		}
+		#leaderboard ol {
+			padding-left: 2em;
+			margin: 0;
 		}
 		.border {
 			border: 10px solid #191919;
@@ -87,6 +115,7 @@
 			-moz-border-radius: 10px;
 			-webkit-border-radius: 10px;
 			border-radius: 10px;
+			width: 760px;
 		}
 		.clear {
 			clear: both;
@@ -101,16 +130,26 @@
 			<p><strong>Click and hold</strong> to shoot!</p>
 		</div>
 	    <div class="border">
-			<canvas id="main" width="900" height="600"></canvas>
+			<canvas id="main" width="760" height="600"></canvas>
 			<div class="clear"></div>
+			<div id="chat"><label for="inputtext">Chat: </label><input type="text" id="inputtext"/></div>
 		</div>
-	    <label for="inputtext">Name: </label><input type="text" id="inputtext"/>
 		<div id="stats">
 			<p>Your <strong>kills:</strong> <span id="kills">0</span></p>
 			<p>Your <strong>deaths:</strong> <span id="deaths">0</span></p>
 		</div>
 		<div id="warning">
 			<p>Try to use <strong>Chrome</strong> or <strong>Safari</strong>.</p>
+		</div>
+		<div id="leaderboard">
+			<p>Who's the best?</p>
+			<ol>
+				<li id="lead0"><strong>gront:</strong> 0</li>
+				<li id="lead1"></li>
+				<li id="lead2"></li>
+				<li id="lead3"></li>
+				<li id="lead4"></li>
+			</ol>
 		</div>
 	</div>
 	<a href="http://nodeknockout.com/teams/demiox-boiko" target="nko" title="Help us win Node.js KO!"><img style="position: fixed; bottom: 5px; right: 5px; border: 0px;" src="http://nodeknockout.com/images/voteko.png" alt="Help me win Node.js KO!"/></a>

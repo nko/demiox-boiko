@@ -3,10 +3,10 @@
     exports.Constants = {
         port : 80,
         tileSize : exports.W,
-        tilesAcross : 90,
+        tilesAcross : 76,
         tilesUp : 60,
-        widthPX : 90 * exports.W,
-        heightPX : 75 * exports.W,
+        widthPX : 76 * exports.W,
+        heightPX : 60 * exports.W,
         refreshRate : 45,
         map : [],
         distanceFrom00 : 5, //TODO make general
