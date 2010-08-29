@@ -264,7 +264,6 @@ var sock = io.listen(server);
 var numConnected = 0;
 
 sock.on('connection', function(client) {
-    numConnected++;
     /*
      *
      * Every time a client sends back information, put it in the update []
@@ -278,12 +277,10 @@ sock.on('connection', function(client) {
         }
 	});
 	client.on('disconnect', function() {
-		console.log('Client Disconnected.');
-        numConnected--;
-        console.log(numConnected + ' people connected.');
-        if (numConnected==0){
+		console.log('Client Disconnected. ' + socket.clients.length + ' people left.');
+        if (socket.clients.length === 0){
             console.log("Regenerating map.");
-            Constants.map = dungen(90, 75, 10, 16, Math.floor(Math.random()*20)+20);
+            Constants.map = dungen(90, 75, 10, 16, Math.floor(Math.random()*21)+30);
         }
 	});
 
