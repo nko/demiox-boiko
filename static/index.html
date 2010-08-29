@@ -76,6 +76,7 @@
 			position: absolute;
 			top: 8px;
 			right: 440px;
+			width: 300px;
 		}
 		#stats {
 			position: absolute;
@@ -108,6 +109,35 @@
 			padding-left: 2em;
 			margin: 0;
 		}
+		#entername {
+			font: 48px "Helvetica Neue", sans-serif;
+			letter-spacing: -3px;
+			background: #111;
+			width: 760px;
+			height: 624px;
+		}
+		#entername p span {
+			color: #aaa;
+			font-size: 72px;
+		}
+		#entername p {
+			margin: 0;
+			padding: 1em;
+			text-align: center;
+			color: #888;
+			text-shadow: 1px 1px 0 #222, 2px 2px 0 #222, 3px 3px 0 #222, 4px 4px 0 #222,5px 5px 0 #222;
+		}
+		#entername input {
+			font-size: 48px;
+			padding: 5px 10px;
+			width: 400px;
+			margin: 0 auto;
+			height: 60px;
+			letter-spacing: -3px;
+		}
+		#game {
+			display: none;
+		}
 		.border {
 			border: 10px solid #191919;
 			margin-left: -10px;
@@ -116,6 +146,7 @@
 			-webkit-border-radius: 10px;
 			border-radius: 10px;
 			width: 760px;
+			position: relative;
 		}
 		.clear {
 			clear: both;
@@ -126,13 +157,19 @@
 	<div id="wrapper">
 		<h1>gun<span>pixel</span></h1>
 		<div id="instructions">
-			<p><strong>WASD</strong> <em>or</em> <strong>arrow keys</strong> move.</p>
-			<p><strong>Click and hold</strong> to shoot!</p>
+			<p><strong>WASD</strong> <em>or</em> <strong>arrow keys</strong> move. <strong>Click and hold</strong> shoots!</p>
+			<p>Press <strong>enter</strong>, type something, enter again to chat!</p>
 		</div>
-	    <div class="border">
+	    <div id="game" class="border">
 			<canvas id="main" width="760" height="600"></canvas>
 			<div class="clear"></div>
 			<div id="chat"><label for="inputtext">Chat: </label><input type="text" id="inputtext"/></div>
+		</div>
+		<div id="naming" class="border">
+			<div id="entername">
+				<p><span>Gunpixeller,</span><br/>tell me your name:</p>
+				<input type="text" id="playername"/>
+			</div>
 		</div>
 		<div id="stats">
 			<p>Your <strong>kills:</strong> <span id="kills">0</span></p>
