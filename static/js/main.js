@@ -518,6 +518,7 @@ function serverUpdate(json){
         return;
     }
     gameState.bullets = [];
+    gameState.players = [];
 
     //Update all modified objects
     for (ID in update){
@@ -594,7 +595,7 @@ function initialize() {
     
     gameState.socket.on('message', serverUpdate);
 
-    var m = new Monster(5, 5, "ff5555");
+    //var m = new Monster(5, 5, "ff5555");
     for (var i=0;i<255;i++) {
         gameState.keys[i]=false;
     }
@@ -621,5 +622,12 @@ $(function() {
         gameState.mouseDown = false;
     });
     
+    window.onbeforeunload = function(){
+        //alert server we are leaving
+        gameState.newState[curPlayer.ID].type = "playerleave";
+        utils.send(JSON.stringify(gameState.newState));
+    };
+
+
     initialize();
 });
