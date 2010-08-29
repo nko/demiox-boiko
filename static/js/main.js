@@ -457,17 +457,6 @@ function drawMap() {
 function getUniqueID() {
     return floor(random()*1e20); //Mathematically sound
 }
-
-/*
- * Server should send back info like so.
- *
- * { player_id : { position_x, position_y } , ... (of all players that moved), 
- *     item_id : { item_x, item_y, picked_up } , ... (of all items that moved),
- *   bullet_id : { bullet_x, bullet_y, destroyed}, ... (of all bullets),
- *
- *   }
- */
-
 /*
  * Currently, we update everything client side because there is no server.
  */
@@ -477,6 +466,13 @@ function getUpdatesFromServer() {
     }
 }
 
+/*
+ * Sent on initial signin
+ *
+ *
+ * Grabs generated map from server, might grab more later.
+ *
+ */
 function login(json){
     map = json.map;
 
@@ -486,9 +482,6 @@ function login(json){
 function serverUpdate(json){
     var update = JSON.parse(json);
     if (update["map"]){
-        /*
-         * Sent on initial signin
-         */
         login(update);
         return;
     }
@@ -509,16 +502,24 @@ function serverUpdate(json){
             b.ID = ID;
             gameState.bullets.push(b);
         }
+        /*
+         * and players
+         */
         if (updatedObject.type == "player"){
-            if (ID == curPlayer.ID) continue;
+            if (ID == curPlayer.ID) {
+                //Update HP
+                curPlayer.HP = updatedObject.HP;
+            } else { 
+                //Update position
 
-            var obj = utils.findObjectWithID(gameState.players, ID);
-            if (!obj){
-                var newPlayer = new Player(updatedObject.x, updatedObject.y, ID, "ff5555", true);
-                gameState.players.push(newPlayer);
-            } else {
-                obj.x = updatedObject.x;
-                obj.y = updatedObject.y;
+                var obj = utils.findObjectWithID(gameState.players, ID);
+                if (!obj){
+                    var newPlayer = new Player(updatedObject.x, updatedObject.y, ID, "ff5555", true);
+                    gameState.players.push(newPlayer);
+                } else {
+                    obj.x = updatedObject.x;
+                    obj.y = updatedObject.y;
+                }
             }
         }
     }
@@ -539,15 +540,6 @@ function serverUpdate(json){
     //console.log(obj);
 }
 
-/* 
- * Send information to the server like so.
- *
- *  { player_id : {position_x, position_y} ,
- *  new_bullets : {theta} //theta is the angle that the bullet is travelling in. 
- *                        //Assume it starts the same place as the player.
- *  picked_up : {item_x, item_y} ...
- *  dropped   :    "        "
- */ 
 function sendUpdatesToServer() {
     utils.send(JSON.stringify(gameState.newState));
 }

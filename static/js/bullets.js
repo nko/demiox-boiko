@@ -18,8 +18,11 @@
      * The server should use the rest.
      */
 
-    if (!typeOfInc) //If we are including from node...
+    if (!typeOfInc){ //If we are including from node...
         this.Constants = require('./constants').Constants;
+        this.Player = require('./players').Player;
+
+    }
 
     exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy, map, isClient) {
         //this.Constants = Constants;
@@ -71,7 +74,7 @@
                 var big = Math.abs(Math.max(this.dx *this.speed, this.dy *this.speed));
                 for (var i=0;i<=big;i++) { 
                     this.x = startX + this.dx * (i+1) * this.speed / big;
-                    this.y = startY + this.dy * (i+1) * this.speed/ big;
+                    this.y = startY + this.dy * (i+1) * this.speed / big;
                     this.point = Constants.Point(this.x, this.y);
 
                     //TODO special handling collision code?
@@ -95,12 +98,15 @@
                     }
                 }
 
-                //TODO should be replaced with all players
-                if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator) {
-                    curPlayer.hit(this);
-                    return true;
-                }
                 */
+
+                for (p in Player.all) { 
+                    console.log(JSON.stringify(Player.all[p].rect));
+                    if (Constants.utils.pointIntersectRect(this.point, Player.all[p].rect)){ //&& Player.all[p] != this.creator) {
+                        Player.all[p].hit(this);
+                        return true;
+                    }
+                }
 
 
                 return false

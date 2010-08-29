@@ -232,11 +232,11 @@ function generateUpdateMessage(){
      */
     for (var b in Bullet.all){
         var cBul = Bullet.all[b];
-        update[cBul.ID] = {};
-        update[cBul.ID].x = cBul.x;
-        update[cBul.ID].y = cBul.y;
-        update[cBul.ID].dx = cBul.dx;
-        update[cBul.ID].dy = cBul.dy;
+        update[cBul.ID]      = {};
+        update[cBul.ID].x    = cBul.x;
+        update[cBul.ID].y    = cBul.y;
+        update[cBul.ID].dx   = cBul.dx;
+        update[cBul.ID].dy   = cBul.dy;
         update[cBul.ID].type = "bullet";
     }
 
@@ -245,10 +245,11 @@ function generateUpdateMessage(){
      */
     for (var p in Player.all){
         var cPlay = Player.all[p];
-        update[cPlay.ID] = {};
-        update[cPlay.ID].x = cPlay.x;
-        update[cPlay.ID].y = cPlay.y;
-        update[cPlay.ID].type = cPlay.isNew ? "playerupdate" : "player";
+        update[cPlay.ID]      = {};
+        update[cPlay.ID].x    = cPlay.x;
+        update[cPlay.ID].y    = cPlay.y;
+        update[cPlay.ID].HP   = cPlay.HP;
+        update[cPlay.ID].type = "player";
     }
 
     return update;
@@ -264,9 +265,9 @@ sock.on('connection', function(client) {
     //Ask clients what is up every 50 ms
     setInterval(function(){
         updateServer();
-        console.log("Pinging all clients");
 
         var update = generateUpdateMessage();
+
         var message = JSON.stringify(update);
         client.broadcast(message);
         client.send(message);
@@ -288,10 +289,11 @@ sock.on('connection', function(client) {
                         //New player!
                         //
                         //TODO write something nice out!
-                        var p = new Player(curUpdate.x, curUpdate.y, ID, "ff5555");
+                        var p = new Player(curUpdate.x, curUpdate.y, ID, "ff5555", 10);
                     } else {
-                        obj.x = curUpdate.x;
-                        obj.y = curUpdate.y;
+                        obj.move(curUpdate.x, curUpdate.y);
+                        obj.x  = curUpdate.x;
+                        obj.y  = curUpdate.y;
                     }
                 }
             }
