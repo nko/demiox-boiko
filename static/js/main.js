@@ -502,8 +502,21 @@ function getUpdatesFromServer() {
     }
 }
 
+function login(json){
+    map = json.map;
+
+    cacheMap();
+}
+
 function serverUpdate(json){
     var update = JSON.parse(json);
+    if (update["map"]){
+        /*
+         * Sent on initial signin
+         */
+        login(update);
+        return;
+    }
     gameState.bullets = [];
 
     //Update all modified objects
@@ -583,13 +596,12 @@ function initialize() {
     for (var i=0;i<255;i++) {
         gameState.keys[i]=false;
     }
-    setInterval(gameLoop, Constants.refreshRate);
+    setInterval(gameLoop, Constants.refreshRate); //TODO NO!!
 }
 
 $(function() {
     canv    = $('#main')[0];
     context = canv.getContext('2d');
-    cacheMap();
     /*
      * Handlers
      */

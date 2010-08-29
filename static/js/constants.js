@@ -9,6 +9,7 @@
         widthPX : 90 * exports.W,
         heightPX : 75 * exports.W,
         refreshRate : 45,
+        map : [],
         distanceFrom00 : 5, //TODO make general
         Rect : function(x1, y1, x2, y2) {
             this.x1=x1;

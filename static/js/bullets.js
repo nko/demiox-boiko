@@ -21,7 +21,7 @@
     if (!typeOfInc)
         this.Constants = require('./constants').Constants;
 
-    exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy) {
+    exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy, map) {
         //this.Constants = Constants;
         this.x = x;
         this.y = y;
@@ -43,6 +43,10 @@
                     this.dy = (dyfar / hyp)*speed;
                 }
             }
+            if (typeof exports.Bullet.all == 'undefined') { //Static variable hack
+                exports.Bullet.all = [];
+            }
+            exports.Bullet.all.push(this);
             //gameState.bullets.push(this);
         }
         this.init();
@@ -127,13 +131,12 @@
             },
         destroy :
             function() {
-                //Bullet.all_bullets or some static ref
-                /*for (x in gameState.bullets) { 
-                    if (gameState.bullets[x].ID == this.ID) { 
-                        gameState.bullets.splice(x, 1);
+                for (x in exports.Bullet.all) { 
+                    if (exports.Bullet.all[x].ID == this.ID) { 
+                        exports.Bullet.all.splice(x, 1);
                         break;
                     }
-                }*/
+                }
             }
     };
 

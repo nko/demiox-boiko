@@ -163,6 +163,56 @@ var utils = {
 };
 
 
+/*
+ * Random dungeon generator.
+ * Transfer to server-side eventually.
+ * (width, height) = size of dungeon.
+ * (minSize, maxSize) = room sizes.
+ */
+function dungen(width, height, minSize, maxSize, numRooms) {
+    // initialize map
+    var map = [], room;
+    for (var x=0; x<width; x++) {
+        var a = [];
+        for (var y=0; y<height; y++) {
+            a.push('#');
+        }
+        map.push(a);
+    }
+    // generate rooms
+    var rooms = [];
+    for (var i=0; i<numRooms; i++) {
+        var w = Math.floor(Math.random()*(maxSize-minSize+1)) + minSize;
+        var h = Math.floor(Math.random()*(maxSize-minSize+1)) + minSize;
+        var x = Math.floor(Math.random()*(width - w));
+        var y = Math.floor(Math.random()*(height - h));
+        rooms.push({ x: x, y: y, w: w, h: h});
+    }
+    // slap rooms onto map like a can of paint
+    for (var i=0; i<numRooms; i++) {
+        var r = rooms[i];
+        for (var y=r.y; y<r.y+r.h; y++) {
+            for (var x=r.x; x<r.x+r.w; x++) {
+                map[y][x] = '.';
+            }
+        }
+    }
+    // connect rooms with hallways
+    var room = rooms.pop();
+    while (rooms.length) {
+        var r = rooms.pop(), x=r.x, y=r.y;
+        while (x != room.x) {
+            x += (room.x - x > 0) ? 1 : -1;
+            map[y][x] = '.';
+        }
+        while (y != room.y) {
+            y += (room.y - y > 0) ? 1 : -1;
+            map[y][x] = '.';
+        }
+    }
+    return map;
+}
+
 
 
 function updateServer(){
@@ -176,8 +226,11 @@ function generateUpdateMessage(){
     var update ={}
     update.tick =  ++ticks; 
 
-    for (var b in gameState.bullets){
-        var cBul = gameState.bullets[b];
+    /*
+     * Update on the position of all the new bullets
+     */
+    for (var b in Bullet.all){
+        var cBul = Bullet.all[b];
         update[cBul.ID] = {};
         update[cBul.ID].x = cBul.x;
         update[cBul.ID].y = cBul.y;
@@ -189,6 +242,8 @@ function generateUpdateMessage(){
     return update;
 }
 
+
+Constants.map = dungen(90, 75, 10, 16, 40);
 
 var sock = io.listen(server);
 
@@ -239,6 +294,13 @@ sock.on('connection', function(client) {
 	client.on('disconnect', function() {
 		console.log('Client Disconnected.');
 	});
+
+
+    /*
+     * Initially send back the randomly generated dungeon
+     */
+    var initialResponse = { "map" : Constants.map } ;
+    client.send(JSON.stringify(initialResponse));
 });
 
 
