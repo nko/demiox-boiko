@@ -263,45 +263,6 @@ Constants.map = dungen(90, 75, 10, 16, 40);
 var sock = io.listen(server);
 
 sock.on('connection', function(client) {
-
-    //Ask clients what is up every 50 ms
-    setInterval(function(){
-        updateServer();
-
-        var update = generateUpdateMessage();
-
-        var message = JSON.stringify(update);
-        client.broadcast(message);
-        client.send(message);
-
-        //console.log("received new info");
-
-        //Updates - all updates received in the last 50ms
-        for (ID in updates){
-            if (utils.isNumeric(ID)){ 
-                var curUpdate = updates[ID];
-                if (curUpdate.type == "bullet") { 
-
-                    //exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy) {
-                    var b = new Bullet(curUpdate.x, curUpdate.y, "000000", 16, ID, curUpdate.creator, curUpdate.dx, curUpdate.dy);
-                } else if (curUpdate.type == "player") { 
-                    var obj = Constants.utils.findObjectWithID( Player.all || [], ID);
-                    if (!obj) {
-                        //New player!
-                        //
-                        //TODO write something nice out!
-                        var p = new Player(curUpdate.x, curUpdate.y, ID, "ff5555", 10);
-                    } else {
-                        obj.move(curUpdate.x, curUpdate.y);
-                        obj.name    = curUpdate.name;
-                        obj.message = curUpdate.message;
-                    }
-                }
-            }
-        }
-        updates = {}; //Clear updates for the new updates to come in.
-    }, updateTime);
-
     /*
      *
      * Every time a client sends back information, put it in the update []
@@ -325,6 +286,48 @@ sock.on('connection', function(client) {
     var initialResponse = { "map" : Constants.map } ;
     client.send(JSON.stringify(initialResponse));
 });
+
+//Ask clients what is up every 50 ms
+setInterval(function(){
+    updateServer();
+
+    var update = generateUpdateMessage();
+
+    var message = JSON.stringify(update);
+    var index = sock.clientsIndex;
+    for (c in index) {
+        var client = index[c];
+        //client.broadcast(message);
+        client.send(message);
+    }
+
+    //console.log("received new info");
+
+    //Updates - all updates received in the last 50ms
+    for (ID in updates){
+        if (utils.isNumeric(ID)){ 
+            var curUpdate = updates[ID];
+            if (curUpdate.type == "bullet") { 
+
+                //exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy) {
+                var b = new Bullet(curUpdate.x, curUpdate.y, "000000", 16, ID, curUpdate.creator, curUpdate.dx, curUpdate.dy);
+            } else if (curUpdate.type == "player") { 
+                var obj = Constants.utils.findObjectWithID( Player.all || [], ID);
+                if (!obj) {
+                    //New player!
+                    //
+                    //TODO write something nice out!
+                    var p = new Player(curUpdate.x, curUpdate.y, ID, "ff5555", 10);
+                } else {
+                    obj.move(curUpdate.x, curUpdate.y);
+                    obj.name    = curUpdate.name;
+                    obj.message = curUpdate.message;
+                }
+            }
+        }
+    }
+    updates = {}; //Clear updates for the new updates to come in.
+}, updateTime);
 
 
 ///////////////////////////////////////////
