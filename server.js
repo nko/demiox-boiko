@@ -258,17 +258,19 @@ function generateUpdateMessage(){
 }
 
 
-Constants.map = dungen(90, 75, 10, 16, 40);
+Constants.map = dungen(90, 75, 10, 16, Math.floor(Math.random()*20)+20);
 
 var sock = io.listen(server);
+var numConnected = 0;
 
 sock.on('connection', function(client) {
+    numConnected++;
     /*
      *
      * Every time a client sends back information, put it in the update []
      */
 	client.on('message', function(json) {
-        //console.log(json + " received.");
+        console.log(json + " received.");
 
         var update = JSON.parse(json);
         for (ID in update){
@@ -277,6 +279,12 @@ sock.on('connection', function(client) {
 	});
 	client.on('disconnect', function() {
 		console.log('Client Disconnected.');
+        numConnected--;
+        console.log(numConnected + ' people connected.');
+        if (numConnected==0){
+            console.log("Regenerating map.");
+            Constants.map = dungen(90, 75, 10, 16, Math.floor(Math.random()*20)+20);
+        }
 	});
 
 
