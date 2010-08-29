@@ -6,6 +6,9 @@ var connect = require('connect')
     , express = require('express')
     , sys = require('sys')
     , io = require('Socket.IO-node')
+    //,
+    , Bullet = require('./static/js/bullets').Bullet
+    //, Monsters  = require('./static/js/monsters')
     , port = 80;
 
 //Setup Express
@@ -46,7 +49,8 @@ server.listen(port);
 //
 
 var W = 10;
-var Constants = {
+//var Constants = Constants;
+/* = {
     port : 80,
     tileSize : W,
     tilesAcross : 25,
@@ -55,16 +59,16 @@ var Constants = {
     heightPX : 25 * W,
     refreshRate : 45,
     distanceFrom00 : 5, //TODO make general
-};
+}; */
 
-
-function Bullet(x, y, creator, dx, dy) {
+/*
+function Bullet(x, y, creator, ID, dx, dy) {
     this.x = x;
     this.y = y;
     this.dx = dx;
     this.dy = dy;
     this.speed = 8; //TODO
-    this.ID = 22;
+    this.ID = ID;
 
 }
 Bullet.prototype = {
@@ -89,7 +93,7 @@ Bullet.prototype = {
             }
         }
 };
-
+*/
 
 //ACTUAL SERVER STUFF GOES HERE
 
@@ -99,6 +103,8 @@ var updates = {};
 
 var gameState = {
     bullets : [],
+    monsters : [],
+    players : [],
 };
 
 
@@ -158,7 +164,6 @@ var utils = {
 
 
 
-gameState.bullets.push(new Bullet(15, 15, undefined, .706, .706));
 
 function updateServer(){
     for (var b in gameState.bullets){
@@ -176,6 +181,8 @@ function generateUpdateMessage(){
         update[cBul.ID] = {};
         update[cBul.ID].x = cBul.x;
         update[cBul.ID].y = cBul.y;
+        update[cBul.ID].dx = cBul.dx;
+        update[cBul.ID].dy = cBul.dy;
         update[cBul.ID].type = "bullet";
     }
 
@@ -200,18 +207,18 @@ sock.on('connection', function(client) {
         //console.log("received new info");
         //console.log(updates);
         //Updates - all updates received in the last 50ms
-        for (id in updates){
-            if (utils.isNumeric(id)){ 
-                var curUpdate = updates[id];
-                if (curUpdate.type == 'newBullet') { 
-                    //console.log("Adding bullet with");
-                    //console.log(curUpdate);
-                    var b = new Bullet(curUpdate.x, curUpdate.y, undefined, curUpdate.dx, curUpdate.dy);
-                    b.ID=id;
+        for (ID in updates){
+            if (utils.isNumeric(ID)){ 
+                var curUpdate = updates[ID];
+                if (curUpdate.type == "bullet") { 
+
+                    //exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy) {
+                    var b = new Bullet(curUpdate.x, curUpdate.y, "000000", 6, ID, undefined, curUpdate.dx, curUpdate.dy);
                     gameState.bullets.push(b);
-                    //client.broadcast(msg);
-                    //client.send(msg);
-                }
+                } /* else if (curUpdate.type == "player") { 
+
+
+                } */
             }
         }
         updates = {}; //Clear updates for the new updates to come in.

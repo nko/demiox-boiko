@@ -13,6 +13,20 @@ var sqrt = Math.sqrt,
     abs = Math.abs,
     random = Math.random;
 
+//Constants = exports.Constants;
+/* {
+    port : 80,
+    tileSize : W,
+    tilesAcross : 90,
+    tilesUp : 75,
+    widthPX : 90 * W,
+    heightPX : 75 * W,
+    refreshRate : 45,
+    distanceFrom00 : 5, //TODO make general
+};*/
+
+//Bullet = exports.Bullet;
+
 //var map = dungen(25, 25, 3, 6, 10);
 /*
 var map = [ ".........................",
@@ -101,25 +115,15 @@ function dungen(width, height, minSize, maxSize, numRooms) {
 /*
  * Static objects
  */
-var Constants = {
-    port : 80,
-    tileSize : W,
-    tilesAcross : 90,
-    tilesUp : 75,
-    widthPX : 90 * W,
-    heightPX : 75 * W,
-    refreshRate : 45,
-    distanceFrom00 : 5, //TODO make general
-};
 var gameState = {
     keys : new Array(255),
     mouseX : 0,
     mouseY : 0,
     mouseDown : false,
-    bullets : [],
-    monsters : [],
     socket : undefined,
     newState : {},  //This is what we send to the server every loop
+    bullets : [],
+    monsters : [],
     players : [],
 };
 
@@ -221,128 +225,6 @@ Player.prototype = {
     },
 };
 
-
-/*
- * Bullet
- *
- * Initialize with x and y and optional dx, dy, speed.
- *
- * If we don't pass in dx/dy, then we assume that the bullet was shot by the current player,
- * so we compute it.
- *
- * dx/dy should be normalized (squared they should add to 1).
- */
-function Bullet(x, y, color, speed, creator, dx, dy) {
-    this.x = x;
-    this.y = y;
-    this.point = new Point(x,y);
-    this.color = color;
-    this.creator = creator;
-    this.ID = getUniqueID();
-    this.init = function() {
-        if (dx != undefined) {
-            this.dx=dx;
-            this.dy=dy;
-            this.speed=speed;
-        } else {
-            var dxfar = gameState.mouseX - this.x;
-            var dyfar = gameState.mouseY - this.y;
-            var hyp = sqrt(dxfar * dxfar + dyfar * dyfar);
-            if (hyp !== 0) {
-                this.dx = (dxfar / hyp)*speed;
-                this.dy = (dyfar / hyp)*speed;
-            }
-        }
-        //gameState.bullets.push(this);
-    }
-    this.init();
-}
-Bullet.prototype = {
-    DMG : 1,
-    W : 4,
-    update :
-        function() {
-            if (this.checkCollision()) {
-                this.destroy();
-            }
-        },
-    checkCollision :
-        function() {
-            var destroy = false;
-            //Don't just check at the new position - check everywhere along that line, in increments of 1
-            var startX = this.x;
-            var startY = this.y;
-            var big = max(this.x, this.y);
-            for (var i=0;i<=big;i++) { 
-                this.x = startX + this.dx * i / big;
-                this.y = startY + this.dy * i / big;
-                this.point = new Point(this.x, this.y);
-
-                //TODO special handling collision code?
-                if (this.checkHarmlessCollision()) {
-                    return true;
-                }
-                //TODO : i think this should be moved to the server...
-                if (this.checkHitObjects()) {
-                    return true;
-                }
-
-                //TODO and when i do this, remove this entirely.
-                if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator) {
-                    return true;
-                }
-            }
-        },
-    checkHitObjects :
-        function() {
-            for (m in gameState.monsters) {
-                if (utils.pointIntersectRect(this.point, gameState.monsters[m].rect) && gameState.monsters[m] != this.creator) {
-                    gameState.monsters[m].hit(this);
-                    return true;
-                }
-            }
-
-            //TODO should be replaced with all players
-            if (utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator) {
-                curPlayer.hit(this);
-                return true;
-            }
-
-
-            return false
-        },
-    checkHarmlessCollision :
-        function() {
-            //Out of bounds?
-            if (this.x > Constants.widthPX || this.x < 0 || this.y > Constants.heightPX || this.y < 0) {
-                return true;
-            }
-
-            this.mapX = floor(this.x / W);
-            this.mapY = floor(this.y / W);
-
-            //Intersection with wall?
-            if (utils.isWall(map[this.mapX][this.mapY])) {
-                return true;
-            }
-
-            return false;
-        },
-    draw :
-        function() {
-            context.fillStyle = this.color;
-            context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
-        },
-    destroy :
-        function() {
-            for (x in gameState.bullets) { 
-                if (gameState.bullets[x].ID == this.ID) { 
-                    gameState.bullets.splice(x, 1);
-                    break;
-                }
-            }
-        }
-};
 /*
  * Monster.
  *
@@ -395,7 +277,7 @@ Monster.prototype = {
                 //Choose a random direction to go in.
                 var v = utils.normalizeVect(floor(random()*3)-1, floor(random()*3)-1);
 
-                new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1], this);
+                //new Bullet(this.x, this.y, "ff5555", 3, this, v[0], v[1], this);
             }
 
         },
@@ -477,6 +359,7 @@ var curPlayer = {
             this.x += dx;
             this.y += dy;
             gameState.newState[curPlayer.ID] = {};
+            gameState.newState[curPlayer.ID].type = "player";
             gameState.newState[curPlayer.ID].x = curPlayer.x
             gameState.newState[curPlayer.ID].y = curPlayer.y
         }
@@ -555,7 +438,7 @@ function shootBullet() {
 
     var d = utils.normalizeVect(gameState.mouseX - curPlayer.x*W, gameState.mouseY - curPlayer.y*W);
     
-    gameState.newState[ID] = {"ID":ID, "type":"newBullet", x:curPlayer.x*W, y:curPlayer.y*W, dx:d[0], dy:d[1] } ;
+    gameState.newState[ID] = {"ID":ID, "type":"bullet", x:curPlayer.x*W, y:curPlayer.y*W, dx:d[0], dy:d[1] } ;
 }
 
 function updateLocal() {
@@ -614,9 +497,6 @@ function getUniqueID() {
  * Currently, we update everything client side because there is no server.
  */
 function getUpdatesFromServer() {
-    for (b in gameState.bullets) {
-        gameState.bullets[b].update(); 
-    }
     for (m in gameState.monsters) {
         gameState.monsters[m].update();
     }
@@ -627,15 +507,22 @@ function serverUpdate(json){
     gameState.bullets = [];
 
     //Update all modified objects
+    console.log(json);
     for (ID in update){
         if (!utils.isNumeric(ID)) continue;
 
         var updatedObject = update[ID];
+        /*
+         * Load updated bullets from server.
+         */
         if (updatedObject.type == "bullet"){
             //Eventually we will just destroy and create, no need for updating
             var obj = utils.findObjectWithID(gameState.bullets, ID);
             //if (!obj){
-                var b = new Bullet(updatedObject.x, updatedObject.y, "000000", 8, undefined, 0, 0);
+            // 
+
+            //exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy) {
+                var b = new Bullet(updatedObject.x, updatedObject.y, "000000", 8, Math.random()*99999999, undefined, obj.dx, obj.dy);
                 b.ID = ID;
                 gameState.bullets.push(b);
             /*} else {
