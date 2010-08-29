@@ -23,7 +23,7 @@ var gameState = {
     socket : undefined,
     newState : {},  //This is what we send to the server every loop
     bullets : [],
-//    monsters : [],
+    monsters : [],
     players : [],
 };
 
@@ -133,13 +133,14 @@ var curPlayer = {
             //<span id="txtlabel">What's your name?</span><input type="text" id="inputtext" /> Enter to send.
             if (this.name == ""){
                 this.name = $("#inputtext").val();
-                $("label").text("Now, spam the other players! :");
+                $("#txtlabel").html("Now, spam the other players! :");
                 curPlayer.name = this.name;
             } else {
                 this.message = ($("#inputtext").val() == "" ? this.message : $("#inputtext").val());
             }
             $("#inputtext").val("");
         }
+
         gameState.newState[curPlayer.ID].name = curPlayer.name;
         gameState.newState[curPlayer.ID].message = curPlayer.message;
 
@@ -175,7 +176,7 @@ var curPlayer = {
 function draw() {
     drawMap();
     drawBullets();
-//    drawMonsters();
+    drawMonsters();
 
     curPlayer.draw();
     drawOtherCharacters();
@@ -210,7 +211,10 @@ function drawOtherCharacters() {
 
 function drawBullets() {
     for (b in gameState.bullets) {
-        gameState.bullets[b].draw();
+        console.log(gameState.bullets[b].creator, " ", curPlayer.ID);
+        console.log(gameState.bullets[b].creator== curPlayer.ID);
+        
+        gameState.bullets[b].draw(gameState.bullets[b].creator == curPlayer.ID);
     }
 }
 
@@ -296,6 +300,7 @@ function login(json){
 }
 
 function serverUpdate(json){
+    console.log(json);
     var update = JSON.parse(json);
     if (update["map"]){
         login(update);
@@ -316,6 +321,7 @@ function serverUpdate(json){
 
             var b = new Bullet(updatedObject.x, updatedObject.y, "000000", 8, Math.random()*99999999, undefined, updatedObject.dx, updatedObject.dy, true);
             b.ID = ID;
+            b.creator = updatedObject.creator;
             gameState.bullets.push(b);
         }
         /*
@@ -391,7 +397,6 @@ function initialize() {
     gameState.socket.connect();
     
     gameState.socket.on('message', serverUpdate);
-
     //var m = new Monster(5, 5, "ff5555");
     for (var i=0;i<255;i++) {
         gameState.keys[i]=false;
@@ -405,41 +410,40 @@ $(function() {
     /*
      * Handlers
      */
-    var takefocus = false;
-    $(document).keydown(function(e) {
-        if (takefocus){
-            //console.log(e.which);
-            gameState.keys[e.which] = true;
-        }
-    }).keyup(function(e) { 
-        if (takefocus){
-            
-        }
-        gameState.keys[e.which] = false;
-    });
-    $("canvas").mouseover(function(e) {
-        takefocus = true;
-    }).mouseout(function(e) {
-        gameState.mouseDown = false;
-        for (var i=0;i<255;i++) {
-            gameState.keys[i] = false;
-        }
-        takefocus = false;
-    }).mousemove(function(e) {
-        if (takefocus){
-            var o = $(this).offset();
-            gameState.mouseX = e.clientX - o.left;
-            gameState.mouseY = e.clientY - o.top;
-        }
-    }).mousedown(function(e) {
-        if (takefocus){
-            gameState.mouseDown = true;
-        }
-    }).mouseup(function(e) {
-        if (takefocus){
-            gameState.mouseDown = false;
-        }
-    });
+    
+     var takefocus = false;
+     $(document).keydown(function(e) {
+         if (takefocus){	 	
+              gameState.keys[e.which] = true;
+         }
+     }).keyup(function(e) { 
+         if (takefocus){
+             gameState.keys[e.which] = false;
+         }
+     });
+     $("canvas").mouseover(function(e) {
+         takefocus = true;
+     }).mouseout(function(e){
+         gameState.mouseDown = false;
+         for (var i=0;i<255;i++) {
+             gameState.keys[i] = false;
+         }
+         takefocus = false;
+     }).mousemove(function(e) {
+         if (takefocus){
+             var o = $(this).offset();
+             gameState.mouseX = e.clientX - o.left;
+             gameState.mouseY = e.clientY - o.top;
+         }
+     }).mousedown(function(e) {
+         if (takefocus){
+             gameState.mouseDown = true;
+         }
+     }).mouseup(function(e) {
+         if (takefocus){
+             gameState.mouseDown = false;
+         }
+     });
     
     window.onbeforeunload = function(){
         //alert server we are leaving
