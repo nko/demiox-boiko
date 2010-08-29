@@ -367,6 +367,7 @@ var curPlayer = {
         var text = curPlayer.name + (curPlayer.name != "" ? ":" : "") + curPlayer.message;
         context.fillText(text, this.x*W, this.y*W-5);
 
+        context.fillText(this.HP + " HP", this.x*W, this.y*W+18);
 
         this.writeStatus();
     },
@@ -419,6 +420,7 @@ function drawOtherCharacters() {
         var cPlayer = gameState.players[c];
         cPlayer.draw(context);
         context.fillText(cPlayer.name + (cPlayer.name != "" ? ":" : "") + cPlayer.message, cPlayer.x*W, cPlayer.y*W-5);
+        context.fillText(cPlayer.HP + " HP", cPlayer.x*W, cPlayer.y*W+18);
     }
 }
 
@@ -544,13 +546,13 @@ function serverUpdate(json){
 
                 var obj = utils.findObjectWithID(gameState.players, ID);
                 if (!obj){
-                    var newPlayer = new Player(updatedObject.x, updatedObject.y, ID, "ff5555", true);
-                    gameState.players.push(newPlayer);
-                } else {
+                    var obj = new Player(updatedObject.x, updatedObject.y, ID, "ff5555", 10, true);
                     obj.x = updatedObject.x;
                     obj.y = updatedObject.y;
                     obj.name = updatedObject.name;
                     obj.message = updatedObject.message;
+                    obj.HP = updatedObject.HP;
+                    gameState.players.push(obj);
                 }
             }
         }
@@ -576,12 +578,10 @@ function sendUpdatesToServer() {
 }
 /* Handle all game actions. This is called several times a second */
 function gameLoop() {
-    console.log(curPlayer.HP);
     gameState.newState = { };
     curPlayer.update();
 
     if (curPlayer.HP <= 0) {
-        console.log("Yup!");
         gameState.newState[curPlayer.ID].type = "playerdie";
         utils.send(JSON.stringify(gameState.newState));
 
