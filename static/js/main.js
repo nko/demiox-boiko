@@ -397,6 +397,7 @@ function gameLoop() {
 
 function initialize() {
     //$("#nofocus").hide();
+    $("input#inputtext").blur()
     io.setPath('/client/');
     gameState.socket = new io.Socket(null, { 
         port: Constants.port,
