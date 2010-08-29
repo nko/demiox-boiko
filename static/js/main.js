@@ -407,6 +407,7 @@ function askName() {
         if (e.which == 13) {
             curPlayer.name = $("#entername input").val();
             $("input#playername").blur();
+            $("#naming").hide();
             $("#game").show();
             initialize();
         }
