@@ -4,7 +4,7 @@
         port : 80,
         tileSize : exports.W,
         tilesAcross : 90,
-        tilesUp : 75,
+        tilesUp : 60,
         widthPX : 90 * exports.W,
         heightPX : 75 * exports.W,
         refreshRate : 45,

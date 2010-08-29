@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	<title>gunpixel</title>
+	<meta charset="UTF-8"/>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 	<script src="/js/constants.js"></script>
 	<script src="/js/bullets.js"></script>
@@ -49,7 +50,7 @@
 			margin: 0 auto;
 			position: relative;
 		}
-		#instructions, #stats {
+		#instructions, #stats, #warning {
 			background: #191919;
 			-moz-border-radius: 10px;
 			-webkit-border-radius: 10px;
@@ -61,16 +62,23 @@
 			padding-left: 10px;
 			text-shadow: 1px 2px 0 #000;
 		}
-		#instructions strong, #stats strong {
+		#instructions strong, #stats strong, #warning strong {
 			color: #ccc;
 		}
 		#instructions {
 			position: absolute;
 			top: 8px;
-			left: 220px;
+			left: 260px;
 		}
 		#stats {
-			
+			position: absolute;
+			top: 8px;
+			left: 480px;
+		}
+		#warning {
+			position: absolute;
+			top: 8px;
+			left: 700px;
 		}
 		.border {
 			border: 10px solid #191919;
@@ -93,15 +101,18 @@
 			<p><strong>Click and hold</strong> to shoot!</p>
 		</div>
 	    <div class="border">
-			<canvas id="main" width="900" height="750"></canvas>
+			<canvas id="main" width="900" height="600"></canvas>
 			<div class="clear"></div>
 		</div>
 	    <label for="inputtext">Name: </label><input type="text" id="inputtext"/>
 		<div id="stats">
-			<p><strong>Kills:</strong> <span id="kills">0</span></p>
-			<p><strong>Deaths:</strong> <span id="deaths">0</span></p>
+			<p>Your <strong>kills:</strong> <span id="kills">0</span></p>
+			<p>Your <strong>deaths:</strong> <span id="deaths">0</span></p>
+		</div>
+		<div id="warning">
+			<p>Try to use <strong>Chrome</strong> or <strong>Safari</strong>.</p>
 		</div>
 	</div>
-	<a href="http://nodeknockout.com/teams/demiox-boiko" target="nko" title="Help us win Node.js KO!"><img style="position: fixed; top: 5px; right: 5px; border: 0px;" src="http://nodeknockout.com/images/voteko.png" alt="Help me win Node.js KO!"/></a>
+	<a href="http://nodeknockout.com/teams/demiox-boiko" target="nko" title="Help us win Node.js KO!"><img style="position: fixed; bottom: 5px; right: 5px; border: 0px;" src="http://nodeknockout.com/images/voteko.png" alt="Help me win Node.js KO!"/></a>
 </body>
 </html>

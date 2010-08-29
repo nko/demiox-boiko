@@ -259,7 +259,7 @@ function generateUpdateMessage(){
 }
 
 
-Constants.map = dungen(90, 75, 10, 16, Math.floor(Math.random()*20)+20);
+Constants.map = dungen(90, 60, 10, 16, Math.floor(Math.random()*20)+20);
 
 var sock = io.listen(server);
 var numConnected = 0;
@@ -284,7 +284,7 @@ sock.on('connection', function(client) {
         console.log(numConnected + ' people connected.');
         if (numConnected==0){
             console.log("Regenerating map.");
-            Constants.map = dungen(90, 75, 10, 16, Math.floor(Math.random()*20)+20);
+            Constants.map = dungen(90, 60, 10, 16, Math.floor(Math.random()*20)+20);
         }
 	});
 

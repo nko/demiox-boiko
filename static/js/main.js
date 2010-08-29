@@ -161,8 +161,8 @@ var curPlayer = {
         //TODO prompt player to restart
     },
     checkCollisions : function(dx, dy) {
-        if (this.x + dx < 0 || this.x + dx > Constants.widthPX ||
-            this.y + dy < 0 || this.y + dy > Constants.heightPX ) return true;
+        if (this.x + dx < 0 || this.x + dx >= Constants.tilesAcross ||
+            this.y + dy < 0 || this.y + dy >= Constants.tilesUp ) return true;
         return utils.isWall(map[this.x + dx][this.y + dy]);
     },
 }
@@ -289,10 +289,10 @@ function login(json){
 
     cacheMap();
 
-    while (map[curPlayer.x][curPlayer.y] == "#"){
-        curPlayer.x = Math.floor ( Math.random() * 50); 
-        curPlayer.y = Math.floor ( Math.random() * 50); 
-    }
+    do {
+        curPlayer.x = Math.floor ( Math.random() * 60); 
+        curPlayer.y = Math.floor ( Math.random() * 60); 
+    } while (map[curPlayer.x][curPlayer.y] == "#");
 }
 
 function serverUpdate(json){
@@ -423,7 +423,6 @@ $(function() {
          for (var i=0;i<255;i++) {
              gameState.keys[i] = false;
          }
-         takefocus = false;
      }).mousemove(function(e) {
          if (takefocus){
              var o = $(this).offset();
@@ -438,6 +437,9 @@ $(function() {
          if (takefocus){
              gameState.mouseDown = false;
          }
+     });
+     $("input").focus(function(e) {
+         takefocus = false;
      });
     
     window.onbeforeunload = function(){
