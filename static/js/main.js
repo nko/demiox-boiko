@@ -402,6 +402,18 @@ function initialize() {
     setInterval(gameLoop, Constants.refreshRate); //TODO NO!!
 }
 
+function askName() {
+    $("#naming").keydown(function(e) {
+        if (e.which == 13) {
+            curPlayer.name = $("#entername input").val();
+            $(this).html("");
+            $("#game").show();
+            initialize();
+        }
+    });
+    $("input#entername").focus();
+}
+
 $(function() {
     canv    = $('#main')[0];
     context = canv.getContext('2d');
@@ -450,7 +462,5 @@ $(function() {
         gameState.newState[curPlayer.ID].type = "playerleave";
         utils.send(JSON.stringify(gameState.newState));
     };
-
-
-    initialize();
+    askName();
 });
