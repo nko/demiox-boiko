@@ -15,6 +15,8 @@
         this.y=y;
         this.HP=HP;
         this.ID=ID;
+        this.name="";
+        this.message="";
         this.color=color;
 
         this.rect = Constants.Rect(this.x*10, this.y*10, this.x*10+10, this.y*10+10);

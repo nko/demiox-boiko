@@ -245,11 +245,13 @@ function generateUpdateMessage(){
      */
     for (var p in Player.all){
         var cPlay = Player.all[p];
-        update[cPlay.ID]      = {};
-        update[cPlay.ID].x    = cPlay.x;
-        update[cPlay.ID].y    = cPlay.y;
-        update[cPlay.ID].HP   = cPlay.HP;
-        update[cPlay.ID].type = "player";
+        update[cPlay.ID]         = {};
+        update[cPlay.ID].x       = cPlay.x;
+        update[cPlay.ID].y       = cPlay.y;
+        update[cPlay.ID].HP      = cPlay.HP;
+        update[cPlay.ID].type    = "player";
+        update[cPlay.ID].name    = cPlay.name;
+        update[cPlay.ID].message = cPlay.message;
     }
 
     return update;
@@ -273,7 +275,6 @@ sock.on('connection', function(client) {
         client.send(message);
 
         //console.log("received new info");
-        //console.log(updates);
 
         //Updates - all updates received in the last 50ms
         for (ID in updates){
@@ -292,8 +293,8 @@ sock.on('connection', function(client) {
                         var p = new Player(curUpdate.x, curUpdate.y, ID, "ff5555", 10);
                     } else {
                         obj.move(curUpdate.x, curUpdate.y);
-                        obj.x  = curUpdate.x;
-                        obj.y  = curUpdate.y;
+                        obj.name    = curUpdate.name;
+                        obj.message = curUpdate.message;
                     }
                 }
             }

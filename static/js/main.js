@@ -324,26 +324,51 @@ var curPlayer = {
     y : 10,
     HP : 10,
     maxHP : 10,
+    name : "",
+    message : "",
     hit : function(bullet) {
         this.HP -= bullet.DMG;
     },
     update : function() {
         var dx = (gameState.keys[68]||gameState.keys[39]) - (gameState.keys[65]||gameState.keys[37]);
         var dy = (gameState.keys[83]||gameState.keys[40]) - (gameState.keys[87]||gameState.keys[38]);
+
+        gameState.newState[curPlayer.ID] = {};
+        
+        gameState.newState[curPlayer.ID].type = "player";
         if (!this.checkCollisions(dx, dy)) {
             this.x += dx;
             this.y += dy;
-            gameState.newState[curPlayer.ID] = {};
-            gameState.newState[curPlayer.ID].type = "player";
             gameState.newState[curPlayer.ID].x = curPlayer.x
             gameState.newState[curPlayer.ID].y = curPlayer.y
         }
+
+        if (gameState.keys[13]){//send message
+            //<span id="txtlabel">What's your name?</span><input type="text" id="inputtext" /> Enter to send.
+            if (this.name == ""){
+                this.name = $("#inputtext").val();
+                $("#txtlabel").html("Now, spam the other players! :");
+                curPlayer.name = this.name;
+            } else {
+                this.message = ($("#inputtext").val() == "" ? this.message : $("#inputtext").val());
+            }
+            $("#inputtext").val("");
+        }
+
+        console.log(curPlayer.message);
+        gameState.newState[curPlayer.ID].name = curPlayer.name;
+        gameState.newState[curPlayer.ID].message = curPlayer.message;
 
         this.rect = new Rect(this.x*W, this.y*W, this.x*W + W, this.y*W + W);
     },
     draw : function() { 
         context.fillStyle = "5555ff";
         context.fillRect(curPlayer.x*W, curPlayer.y*W, W, W);
+
+        var text = curPlayer.name + (curPlayer.name != "" ? ":" : "") + curPlayer.message;
+        context.fillText(text, this.x*W, this.y*W-5);
+
+
         this.writeStatus();
     },
     destroy : function() {
@@ -392,7 +417,9 @@ function drawFogOfWar() {
 
 function drawOtherCharacters() {
     for (c in gameState.players) {
-        gameState.players[c].draw(context);
+        var cPlayer = gameState.players[c];
+        cPlayer.draw(context);
+        context.fillText(cPlayer.name + (cPlayer.name != "" ? ":" : "") + cPlayer.message, cPlayer.x*W, cPlayer.y*W-5);
     }
 }
 
@@ -493,7 +520,6 @@ function serverUpdate(json){
     gameState.bullets = [];
 
     //Update all modified objects
-    console.log(json);
     for (ID in update){
         if (!utils.isNumeric(ID)) continue;
 
@@ -524,6 +550,8 @@ function serverUpdate(json){
                 } else {
                     obj.x = updatedObject.x;
                     obj.y = updatedObject.y;
+                    obj.name = updatedObject.name;
+                    obj.message = updatedObject.message;
                 }
             }
         }
@@ -542,7 +570,6 @@ function serverUpdate(json){
     } */
 
     sendUpdatesToServer();
-    //console.log(obj);
 }
 
 function sendUpdatesToServer() {
