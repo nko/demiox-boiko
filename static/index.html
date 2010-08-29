@@ -16,7 +16,7 @@
 		}
 		canvas {
 			background: #000;
-			margin-top: 20px;
+			float: left;
 		}
 		label {
 			font: 14px/24px "Helvetica Neue", sans-serif;
@@ -26,6 +26,7 @@
 			display: block;
 			float: left;
 			padding-right: 6px;
+			text-shadow: 1px 2px 0 #000;
 		}
 		input {
 			width: 600px;
@@ -33,18 +34,65 @@
 			font: 20px "Helvetica Neue", sans-serif;
 			border: 1px solid #ccc;
 		}
+		h1 {
+			font: 64px "Helvetica Neue", sans-serif;
+			color: #666;
+			margin: 0;
+			letter-spacing: -6px;
+			text-shadow: 5px 5px 0 #191919;
+		}
+		h1 span {
+			color: #A45242;
+		}
 		#wrapper {
 			width: 900px;
 			margin: 0 auto;
+			position: relative;
+		}
+		#instructions {
+			background: #191919;
+			-moz-border-radius: 10px;
+			-webkit-border-radius: 10px;
+			border-radius: 10px;
+			color: #888;
+			font: 12px "Helvetica Neue", sans-serif;
+			position: absolute;
+			top: 8px;
+			left: 220px;
+			width: 200px;
+			height: 65px;
+			padding-left: 10px;
+			text-shadow: 1px 2px 0 #000;
+		}
+		#instructions strong {
+			color: #ccc;
+		}
+		.border {
+			border: 10px solid #191919;
+			margin-left: -10px;
+			margin-right: -10px;
+			-moz-border-radius: 10px;
+			-webkit-border-radius: 10px;
+			border-radius: 10px;
+		}
+		.clear {
+			clear: both;
 		}
 	</style>
 </head>
 <body>
-	<a href="http://nodeknockout.com/teams/demiox-boiko" target="nko" title="Help us win Node.js KO!"><img style="position: fixed; top: 5px; right: 5px; border: 0px;" src="http://nodeknockout.com/images/voteko.png" alt="Help me win Node.js KO!"/></a>
 	<div id="wrapper">
-	    <canvas id="main" width="900" height="750"></canvas><br />
-	    <label for="inputtext">Name:</label> <input type="text" id="inputtext"/>
-	    <div id="status"></div>
+		<h1>gun<span>pixel</span></h1>
+		<div id="instructions">
+			<p><strong>WASD</strong> <em>or</em> <strong>arrow keys</strong> move.</p>
+			<p><strong>Click and hold</strong> to shoot!</p>
+		</div>
+	    <div class="border">
+			<canvas id="main" width="900" height="750"></canvas>
+			<div class="clear"></div>
+		</div>
+	    <label for="inputtext">Name: </label><input type="text" id="inputtext"/>
 	</div>
+	<a href="http://nodeknockout.com/teams/demiox-boiko" target="nko" title="Help us win Node.js KO!"><img style="position: fixed; top: 5px; right: 5px; border: 0px;" src="http://nodeknockout.com/images/voteko.png" alt="Help me win Node.js KO!"/></a>
 </body>
 </html>

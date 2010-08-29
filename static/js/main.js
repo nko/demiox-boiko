@@ -368,17 +368,12 @@ var curPlayer = {
         context.fillText(text, this.x*W, this.y*W-5);
 
         context.fillText(this.HP + " HP", this.x*W, this.y*W+18);
-
-        this.writeStatus();
     },
     destroy : function() {
         //TODO send message to server
         //
         //TODO prompt player to restart
     },
-    writeStatus : function() {
-        $("#status").html("HP: " + this.HP + "/" + this.maxHP);
-    }, 
     checkCollisions : function(dx, dy) {
         return utils.isWall(map[this.x + dx][this.y + dy]);
     },
