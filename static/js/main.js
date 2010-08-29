@@ -200,31 +200,6 @@ function Point(x, y) {
     this.x=x;
     this.y=y;
 }
-
-/*
- *
- * Player
- *
- * Distinguished from curPlayer; these are non playable characters, controlled by other people.
- */
-
-function Player(x, y, ID, color){
-    this.x=x;
-    this.y=y;
-    this.ID=ID;
-    this.color=color;
-}
-Player.prototype = {
-    move : function(x, y){
-        this.x=x;
-        this.y=y;
-    },
-    draw : function() { 
-        context.fillStyle = this.color;
-        context.fillRect(this.x*W, this.y*W, W, W);
-    },
-};
-
 /*
  * Monster.
  *
@@ -395,7 +370,7 @@ function draw() {
 
     curPlayer.draw();
     drawOtherCharacters();
-    //drawFogOfWar(); //Laggy???
+    //drawFogOfWar(); //Laggy??? -- TODO need to check into this to be sure
 }
 
 function drawFogOfWar() {
@@ -417,7 +392,7 @@ function drawFogOfWar() {
 
 function drawOtherCharacters() {
     for (c in gameState.players) {
-        gameState.players[c].draw();
+        gameState.players[c].draw(context);
     }
 }
 
@@ -529,19 +504,22 @@ function serverUpdate(json){
          * Load updated bullets from server.
          */
         if (updatedObject.type == "bullet"){
-            //Eventually we will just destroy and create, no need for updating
-            var obj = utils.findObjectWithID(gameState.bullets, ID);
-            //if (!obj){
-            // 
 
-            //exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy) {
-                var b = new Bullet(updatedObject.x, updatedObject.y, "000000", 8, Math.random()*99999999, undefined, obj.dx, obj.dy);
-                b.ID = ID;
-                gameState.bullets.push(b);
-            /*} else {
+            var b = new Bullet(updatedObject.x, updatedObject.y, "000000", 8, Math.random()*99999999, undefined, updatedObject.dx, updatedObject.dy, true);
+            b.ID = ID;
+            gameState.bullets.push(b);
+        }
+        if (updatedObject.type == "player"){
+            if (ID == curPlayer.ID) continue;
+
+            var obj = utils.findObjectWithID(gameState.players, ID);
+            if (!obj){
+                var newPlayer = new Player(updatedObject.x, updatedObject.y, ID, "ff5555", true);
+                gameState.players.push(newPlayer);
+            } else {
                 obj.x = updatedObject.x;
                 obj.y = updatedObject.y;
-            }*/
+            }
         }
     }
     /*

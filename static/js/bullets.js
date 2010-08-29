@@ -18,10 +18,10 @@
      * The server should use the rest.
      */
 
-    if (!typeOfInc)
+    if (!typeOfInc) //If we are including from node...
         this.Constants = require('./constants').Constants;
 
-    exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy, map) {
+    exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy, map, isClient) {
         //this.Constants = Constants;
         this.x = x;
         this.y = y;
@@ -47,7 +47,9 @@
             if (typeof exports.Bullet.all == 'undefined') { //Static variable hack
                 exports.Bullet.all = [];
             }
-            exports.Bullet.all.push(this);
+            if (!isClient) { 
+                exports.Bullet.all.push(this);
+            }
             //gameState.bullets.push(this);
         }
         this.init();

@@ -1,5 +1,4 @@
 (function(exports){
-    var exports = exports || {}; //A hack so this code is accessible both client & serverside
     exports.W = 10;
     exports.Constants = {
         port : 80,

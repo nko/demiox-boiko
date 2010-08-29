@@ -8,6 +8,7 @@ var connect = require('connect')
     , io = require('Socket.IO-node')
     //,
     , Bullet = require('./static/js/bullets').Bullet
+    , Player = require('./static/js/players').Player
     //, Monsters  = require('./static/js/monsters')
     , port = 80;
 
@@ -239,6 +240,17 @@ function generateUpdateMessage(){
         update[cBul.ID].type = "bullet";
     }
 
+    /*
+     * and players
+     */
+    for (var p in Player.all){
+        var cPlay = Player.all[p];
+        update[cPlay.ID] = {};
+        update[cPlay.ID].x = cPlay.x;
+        update[cPlay.ID].y = cPlay.y;
+        update[cPlay.ID].type = cPlay.isNew ? "playerupdate" : "player";
+    }
+
     return update;
 }
 
@@ -261,6 +273,7 @@ sock.on('connection', function(client) {
 
         //console.log("received new info");
         //console.log(updates);
+
         //Updates - all updates received in the last 50ms
         for (ID in updates){
             if (utils.isNumeric(ID)){ 
@@ -269,11 +282,18 @@ sock.on('connection', function(client) {
 
                     //exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy) {
                     var b = new Bullet(curUpdate.x, curUpdate.y, "000000", 16, ID, undefined, curUpdate.dx, curUpdate.dy);
-                    gameState.bullets.push(b);
-                } /* else if (curUpdate.type == "player") { 
-
-
-                } */
+                } else if (curUpdate.type == "player") { 
+                    var obj = Constants.utils.findObjectWithID( Player.all || [], ID);
+                    if (!obj) {
+                        //New player!
+                        //
+                        //TODO write something nice out!
+                        var p = new Player(curUpdate.x, curUpdate.y, ID, "ff5555");
+                    } else {
+                        obj.x = curUpdate.x;
+                        obj.y = curUpdate.y;
+                    }
+                }
             }
         }
         updates = {}; //Clear updates for the new updates to come in.
