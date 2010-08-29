@@ -353,7 +353,7 @@ function serverUpdate(json){
 
     for (var i=0;i<5;i++){
         if ( ("leader"+i) in update){
-            $("#leader"+i).html( "<strong>"+update["leader"+i].name+":</strong> " + update["leader"+i].kills ) ;
+            $("#lead"+i).html( "<strong>"+update["leader"+i].name+":</strong> " + update["leader"+i].kills ) ;
         }
     }
 
