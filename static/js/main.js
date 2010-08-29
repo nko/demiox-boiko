@@ -465,10 +465,24 @@ function draw() {
 
     curPlayer.draw();
     drawOtherCharacters();
+    drawFogOfWar();
 }
 
 function drawFogOfWar() {
-    //curPlayer
+    var r = 150, x = curPlayer.x*10 + 5, y = curPlayer.y*10 + 5;
+    context.fillStyle = "rgb(51, 51, 51)";
+    context.fillRect(0, 0, Constants.widthPX, y - r);
+    context.fillRect(0, 0, x - r, Constants.heightPX);
+    context.fillRect(x + r, 0, Constants.widthPX - x, Constants.heightPX);
+    context.fillRect(0, y + r, Constants.widthPX, Constants.heightPX - y);
+    var fog = context.createRadialGradient(x, y, 0, x, y, r);
+    fog.addColorStop(0.6, "rgba(51,51,51,0)");
+    fog.addColorStop(0.65, "rgba(51,51,51,.05)");
+    fog.addColorStop(0.8, "rgba(51,51,51,.3)");
+    fog.addColorStop(1, "rgba(51,51,51,1)");
+    context.fillStyle = fog;
+    context.rect(x - r, y - r, r*2, r*2);
+    context.fill();
 }
 
 function drawOtherCharacters() {
@@ -515,8 +529,9 @@ function cacheMap() {
 cacheMap.img = undefined;
 
 function drawMap() {
-    if (cacheMap.img)
+    if (cacheMap.img) {
         context.putImageData(cacheMap.img, 0, 0);
+    }
 }
 
 /*
