@@ -269,7 +269,7 @@ sock.on('connection', function(client) {
      * Every time a client sends back information, put it in the update []
      */
 	client.on('message', function(json) {
-        console.log(json + " received.");
+        //console.log(json + " received.");
 
         var update = JSON.parse(json);
         for (ID in update){
@@ -277,8 +277,8 @@ sock.on('connection', function(client) {
         }
 	});
 	client.on('disconnect', function() {
-		console.log('Client Disconnected. ' + socket.clients.length + ' people left.');
-        if (socket.clients.length === 0){
+		console.log('Client Disconnected. ' + sock.clients.length + ' people left.');
+        if (sock.clients.length === 0){
             console.log("Regenerating map.");
             Constants.map = dungen(90, 75, 10, 16, Math.floor(Math.random()*21)+30);
         }
