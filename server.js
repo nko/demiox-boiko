@@ -297,8 +297,10 @@ setInterval(function(){
     var index = sock.clientsIndex;
     for (c in index) {
         var client = index[c];
-        //client.broadcast(message);
-        client.send(message);
+        if (client) {
+            //client.broadcast(message);
+            client.send(message);
+        }
     }
 
     //console.log("received new info");
