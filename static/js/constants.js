@@ -27,7 +27,7 @@
         utils : {
             isWall : 
                 function(x) {
-                    return walls.indexOf(x) != -1;
+                    return "#".indexOf(x) != -1;
                 },
 
             //Returns true if the point at pX, pY intersects the rect with top left rX1, rY1 and bottom right rX2, rY2

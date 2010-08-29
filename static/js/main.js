@@ -395,7 +395,7 @@ function draw() {
 
     curPlayer.draw();
     drawOtherCharacters();
-    drawFogOfWar();
+    //drawFogOfWar(); //Laggy???
 }
 
 function drawFogOfWar() {

@@ -29,11 +29,12 @@
         this.color = color;
         this.creator = creator;
         this.ID = ID;
+
+        this.speed=speed;
         this.init = function() {
             if (dx != undefined) {
                 this.dx=dx;
                 this.dy=dy;
-                this.speed=speed;
             } else {
                 var dxfar = gameState.mouseX - this.x;
                 var dyfar = gameState.mouseY - this.y;
@@ -65,10 +66,10 @@
                 //Don't just check at the new position - check everywhere along that line, in increments of 1
                 var startX = this.x;
                 var startY = this.y;
-                var big = Math.max(this.x, this.y);
+                var big = Math.abs(Math.max(this.dx *this.speed, this.dy *this.speed));
                 for (var i=0;i<=big;i++) { 
-                    this.x = startX + this.dx * i / big;
-                    this.y = startY + this.dy * i / big;
+                    this.x = startX + this.dx * (i+1) * this.speed / big;
+                    this.y = startY + this.dy * (i+1) * this.speed/ big;
                     this.point = Constants.Point(this.x, this.y);
 
                     //TODO special handling collision code?
@@ -80,11 +81,8 @@
                         return true;
                     }
 
-                    //TODO and when i do this, remove this entirely.
-                    /*if (this.Constants.utils.pointIntersectRect(this.point, curPlayer.rect) && curPlayer != this.creator) {
-                        return true;
-                    } */
                 }
+                //if (this.startX == this.x && this.startY = this.y) this.destroy();
             },
         checkHitObjects :
             function() {
@@ -115,12 +113,10 @@
                 this.mapX = Math.floor(this.x / 10);
                 this.mapY = Math.floor(this.y / 10);
 
-                /*
                 //Intersection with wall?
-                if (utils.isWall(map[this.mapX][this.mapY])) {
+                if (isNaN(this.mapX) || isNaN(this.mapY) || Constants.utils.isWall(Constants.map[this.mapX][this.mapY])) {
                     return true;
                 }
-                */
 
                 return false;
             },

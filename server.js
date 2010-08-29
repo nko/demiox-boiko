@@ -216,8 +216,8 @@ function dungen(width, height, minSize, maxSize, numRooms) {
 
 
 function updateServer(){
-    for (var b in gameState.bullets){
-        var cBul = gameState.bullets[b];
+    for (var b in Bullet.all){
+        var cBul = Bullet.all[b];
         cBul.update();
     }
 }
@@ -268,7 +268,7 @@ sock.on('connection', function(client) {
                 if (curUpdate.type == "bullet") { 
 
                     //exports.Bullet = function(x, y, color, speed, ID, creator, dx, dy) {
-                    var b = new Bullet(curUpdate.x, curUpdate.y, "000000", 6, ID, undefined, curUpdate.dx, curUpdate.dy);
+                    var b = new Bullet(curUpdate.x, curUpdate.y, "000000", 16, ID, undefined, curUpdate.dx, curUpdate.dy);
                     gameState.bullets.push(b);
                 } /* else if (curUpdate.type == "player") { 
 
