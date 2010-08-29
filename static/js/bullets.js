@@ -42,8 +42,8 @@
             var dyfar = gameState.mouseY - this.y;
             var hyp = sqrt(dxfar * dxfar + dyfar * dyfar);
             if (hyp !== 0) {
-                this.dx = (dxfar / hyp)*speed;
-                this.dy = (dyfar / hyp)*speed;
+                this.dx = (dxfar / hyp);
+                this.dy = (dyfar / hyp);
             }
         }
         if (typeof Bullet.all == 'undefined') { //Static variable hack

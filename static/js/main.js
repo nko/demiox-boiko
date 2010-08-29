@@ -161,10 +161,8 @@ var curPlayer = {
         //TODO prompt player to restart
     },
     checkCollisions : function(dx, dy) {
-        var x = this.x + dx;
-        var y = this.y + dy;
-        if (x < 0 || y < 0 || x >= this.map.length || y >= this.map[0].length)
-            return true;
+        if (this.x + dx < 0 || this.x + dx > Constants.widthPX ||
+            this.y + dy < 0 || this.y + dy > Constants.heightPX ) return true;
         return utils.isWall(map[this.x + dx][this.y + dy]);
     },
 }
@@ -211,8 +209,6 @@ function drawOtherCharacters() {
 
 function drawBullets() {
     for (b in gameState.bullets) {
-        console.log(gameState.bullets[b].creator, " ", curPlayer.ID);
-        console.log(gameState.bullets[b].creator== curPlayer.ID);
         
         gameState.bullets[b].draw(gameState.bullets[b].creator == curPlayer.ID);
     }
@@ -300,7 +296,6 @@ function login(json){
 }
 
 function serverUpdate(json){
-    console.log(json);
     var update = JSON.parse(json);
     if (update["map"]){
         login(update);
