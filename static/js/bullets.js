@@ -125,8 +125,11 @@
                 return false;
             },
         draw :
-            function() {
-                context.fillStyle = this.color;
+            function(madeByCreator) {
+                if (madeByCreator)
+                    context.fillStyle = this.color;
+                else
+                    context.fillStyle = "ff2222";
                 context.fillRect(this.x-this.W/2, this.y-this.W/2, this.W, this.W);
             },
         destroy :

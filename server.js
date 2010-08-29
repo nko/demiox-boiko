@@ -232,12 +232,13 @@ function generateUpdateMessage(){
      */
     for (var b in Bullet.all){
         var cBul = Bullet.all[b];
-        update[cBul.ID]      = {};
-        update[cBul.ID].x    = cBul.x;
-        update[cBul.ID].y    = cBul.y;
-        update[cBul.ID].dx   = cBul.dx;
-        update[cBul.ID].dy   = cBul.dy;
-        update[cBul.ID].type = "bullet";
+        update[cBul.ID]           = {};
+        update[cBul.ID].x         = cBul.x;
+        update[cBul.ID].y         = cBul.y;
+        update[cBul.ID].dx        = cBul.dx;
+        update[cBul.ID].dy        = cBul.dy;
+        update[cBul.ID].creator   = cBul.creator;
+        update[cBul.ID].type      = "bullet";
     }
 
     /*
@@ -328,10 +329,12 @@ setInterval(function(){
                     //
                     //TODO write something nice out!
                     var p = new Player(curUpdate.x, curUpdate.y, ID, "ff5555", 10);
+                    p.lastUpdate = ticks;
                 } else {
                     obj.move(curUpdate.x, curUpdate.y);
                     obj.name    = curUpdate.name;
                     obj.message = curUpdate.message;
+                    obj.lastUpdate = ticks;
                 }
             } else if (curUpdate.type == "playerleave") { 
                     console.log("Playerleave.");
@@ -344,6 +347,13 @@ setInterval(function(){
 
                     obj.HP = obj.maxHP;
              }
+        }
+    }
+
+    //Remove laggy players
+    for (p in Player.all){
+        if (ticks - Player.all[p].lastUpdate>9 || Player.all[p].HP < -1){
+            Player.all[p].destroy();
         }
     }
     updates = {}; //Clear updates for the new updates to come in.

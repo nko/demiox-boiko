@@ -19,6 +19,7 @@
         this.name="";
         this.message="";
         this.color=color;
+        this.lastUpdate=0;
 
         this.rect = Constants.Rect(this.x*10, this.y*10, this.x*10+10, this.y*10+10);
 
